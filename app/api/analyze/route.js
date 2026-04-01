@@ -1,7 +1,7 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+// ASHIRA Sales Intelligence — API Route v2
+import Anthropic from '@anthropic-ai/sdk';
 
-const genAI = new GoogleGenerativeAI(process.env.API_GEMINI || process.env.ANTHROPIC_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const PLAYBOOK = {
   stages: [
@@ -76,6 +76,13 @@ function scoreMessage(message) {
 }
 
 export async function POST(req) {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return Response.json(
+      { error: 'ANTHROPIC_API_KEY no configurada. Agrégala en Vercel → Settings → Environment Variables.' },
+      { status: 500 }
+    );
+  }
+
   try {
     const { message } = await req.json();
     if (!message?.trim()) return Response.json({ error: 'Mensaje vacío' }, { status: 400 });
@@ -143,18 +150,25 @@ Formato exacto:
   "next_step": "Acción concreta recomendada después de enviar la respuesta #1"
 }`;
 
-    const prompt = `${systemPrompt}\n\nAnaliza este mensaje del prospecto:\n\n"${message}"\n\nScores del análisis local: ${JSON.stringify(localScores)}\n\nGenera las 3 mejores respuestas del playbook ASHIRA.`;
+    const response = await client.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1800,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: `Analiza este mensaje del prospecto:\n\n"${message}"\n\nScores del análisis local: ${JSON.stringify(localScores)}\n\nGenera las 3 mejores respuestas del playbook ASHIRA.` }],
+    });
 
-    const result_gen = await model.generateContent(prompt);
-    const response = await result_gen.response;
-    const text = response.text();
-
-    const jsonStr = text.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
-    const result = JSON.parse(jsonStr);
+    const raw = response.content[0].text.trim();
+    const clean = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
+    const result = JSON.parse(clean);
 
     return Response.json({ ...result, local_scores: localScores });
   } catch (err) {
-    console.error('Analyze error:', err);
-    return Response.json({ error: 'Error al analizar el mensaje', detail: err.message }, { status: 500 });
+    console.error('ASHIRA Analyze Error:', err);
+    let errorMsg = 'Error al analizar el mensaje.';
+    if (err.status === 401) errorMsg = 'API key inválida. Verifica ANTHROPIC_API_KEY en Vercel → Settings → Environment Variables.';
+    else if (err.status === 404) errorMsg = 'Modelo no encontrado. Contacta al soporte.';
+    else if (err instanceof SyntaxError) errorMsg = 'Error procesando respuesta IA. Intenta de nuevo.';
+    else if (err.message) errorMsg = err.message;
+    return Response.json({ error: errorMsg }, { status: 500 });
   }
 }
