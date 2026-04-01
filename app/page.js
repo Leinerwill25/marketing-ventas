@@ -380,14 +380,14 @@ const CHECKINS = [
 
 function Tag({ children, color = 'blue' }) {
   const colors = {
-    blue: 'bg-blue-900/40 text-blue-300 border border-blue-700/30',
-    green: 'bg-emerald-900/40 text-emerald-300 border border-emerald-700/30',
-    purple: 'bg-purple-900/40 text-purple-300 border border-purple-700/30',
-    amber: 'bg-amber-900/40 text-amber-300 border border-amber-700/30',
-    mint: 'bg-teal-900/40 text-teal-300 border border-teal-700/30',
+    blue: 'bg-blue-50 text-blue-700 border-blue-200',
+    green: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    purple: 'bg-purple-50 text-purple-700 border-purple-200',
+    amber: 'bg-amber-50 text-amber-700 border-amber-200',
+    mint: 'bg-teal-50 text-teal-700 border-teal-200',
   };
   return (
-    <span className={`tag ${colors[color] || colors.blue}`}>{children}</span>
+    <span className={`tag border ${colors[color] || colors.blue}`}>{children}</span>
   );
 }
 
@@ -400,8 +400,12 @@ function CopyButton({ text }) {
   };
   return (
     <button onClick={copy}
-      className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md transition-all duration-200"
-      style={{ background: copied ? 'rgba(127,255,212,0.15)' : 'rgba(74,125,232,0.1)', color: copied ? '#7FFFD4' : '#6FA8F5', border: `1px solid ${copied ? 'rgba(127,255,212,0.3)' : 'rgba(74,125,232,0.2)'}` }}>
+      className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md transition-all duration-200 font-medium"
+      style={{ 
+        background: copied ? 'rgba(16, 185, 129, 0.1)' : 'rgba(37, 99, 235, 0.05)', 
+        color: copied ? '#059669' : '#2563EB', 
+        border: `1px solid ${copied ? 'rgba(16, 185, 129, 0.2)' : 'rgba(37, 99, 235, 0.1)'}` 
+      }}>
       {copied ? '✓ Copiado' : '⎘ Copiar'}
     </button>
   );
@@ -410,30 +414,39 @@ function CopyButton({ text }) {
 function Collapsible({ title, badge, badgeColor, icon, children }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="card-hover rounded-xl" style={{ background: 'rgba(13,31,60,0.6)' }}>
+    <div className="card-elegant rounded-xl overflow-hidden mb-3">
       <button onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-3 p-4 text-left">
-        <span className="text-xl">{icon}</span>
+        className="w-full flex items-center gap-4 p-5 text-left transition-colors hover:bg-gray-50/50">
+        <span className="text-xl w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100">{icon}</span>
         <div className="flex-1">
-          <div className="font-medium text-sm" style={{ fontFamily: 'var(--font-display)', color: '#e2eaf8' }}>{title}</div>
-          {badge && <div className="mt-1"><Tag color={badgeColor}>{badge}</Tag></div>}
+          <div className="font-bold text-sm tracking-tight" style={{ fontFamily: 'var(--font-display)', color: 'var(--ash-text)' }}>{title}</div>
+          {badge && <div className="mt-1.5"><Tag color={badgeColor}>{badge}</Tag></div>}
         </div>
-        <span style={{ color: '#4A7DE8', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.3s' }}>▾</span>
+        <span className="transition-transform duration-300" style={{ color: 'var(--ash-primary)', transform: open ? 'rotate(180deg)' : 'none' }}>
+          <svg width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+        </span>
       </button>
       <div className={`collapsible-content ${open ? 'open' : ''}`}>
-        <div className="px-4 pb-4">{children}</div>
+        <div className="px-5 pb-5 border-t border-gray-50 pt-4 bg-white/50">{children}</div>
       </div>
     </div>
   );
 }
 
 function MsgBlock({ text, color = 'blue' }) {
-  const borderColors = { blue: '#4A7DE8', mint: '#7FFFD4', amber: '#f59e0b', purple: '#a78bfa' };
+  const borderColors = { blue: '#2563EB', mint: '#10B981', amber: '#F59E0B', purple: '#7C3AED' };
+  const bgColors = { blue: '#F0F7FF', mint: '#F0FDF4', amber: '#FFFBEB', purple: '#F5F3FF' };
+  
   return (
-    <div className="relative rounded-r-xl rounded-bl-xl p-4 mb-3"
-      style={{ background: 'rgba(10,22,40,0.8)', borderLeft: `3px solid ${borderColors[color] || borderColors.blue}` }}>
-      <pre className="text-xs leading-relaxed whitespace-pre-wrap" style={{ fontFamily: 'var(--font-body)', color: '#b8cce8' }}>{text}</pre>
-      <div className="mt-2 flex justify-end"><CopyButton text={text} /></div>
+    <div className="relative rounded-xl p-5 mb-4 border"
+      style={{ 
+        background: bgColors[color] || bgColors.blue, 
+        borderColor: `${borderColors[color] || borderColors.blue}20`,
+        borderLeft: `4px solid ${borderColors[color] || borderColors.blue}` 
+      }}>
+      <pre className="text-[13px] leading-relaxed whitespace-pre-wrap font-medium" 
+        style={{ fontFamily: 'var(--font-body)', color: 'var(--ash-text)' }}>{text}</pre>
+      <div className="mt-3 flex justify-end gap-2 border-t border-black/5 pt-3"><CopyButton text={text} /></div>
     </div>
   );
 }
@@ -480,140 +493,136 @@ function AIAnalyzer() {
   };
 
   const sentimentConfig = {
-    positivo: { label: 'Positivo', color: '#7FFFD4', bg: 'rgba(127,255,212,0.1)' },
-    neutro: { label: 'Neutro', color: '#6FA8F5', bg: 'rgba(74,125,232,0.1)' },
-    negativo: { label: 'Negativo', color: '#f87171', bg: 'rgba(239,68,68,0.1)' },
-    con_objecion: { label: 'Con objeción', color: '#fbbf24', bg: 'rgba(251,191,36,0.1)' },
+    positivo: { label: 'Positivo', color: '#10B981', bg: '#F0FDF4' },
+    neutro: { label: 'Neutro', color: '#2563EB', bg: '#F0F7FF' },
+    negativo: { label: 'Negativo', color: '#EF4444', bg: '#FEF2F2' },
+    con_objecion: { label: 'Con objeción', color: '#F59E0B', bg: '#FFFBEB' },
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Input area */}
-      <div className="gradient-border" style={{ position: 'relative', zIndex: 0 }}>
-        <div className="rounded-xl p-4" style={{ background: '#0a1628' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <div className="glow-dot" />
-            <span className="section-title">Analizador IA — Pega el mensaje del cliente</span>
+      <div className="card-elegant rounded-2xl p-6 bg-white">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-2 h-6 bg-blue-600 rounded-full" />
+          <span className="section-title text-gray-900">Analizador Inteligente</span>
+        </div>
+        <textarea ref={textareaRef} value={input} onChange={e => setInput(e.target.value)}
+          rows={5} placeholder="Pega aquí el mensaje del cliente para recibir consejos estratégicos..."
+          className="w-full rounded-xl p-4 text-sm transition-all focus:ring-2 focus:ring-blue-100 outline-none"
+          style={{ background: '#F9FAFB', border: '1px solid var(--ash-border)', color: 'var(--ash-text)', fontFamily: 'var(--font-body)' }}
+          onKeyDown={e => { if (e.key === 'Enter' && e.metaKey) analyze(); }} />
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-4 gap-4">
+          <div className="flex gap-2 flex-wrap">
+            {examples.slice(0, 3).map((ex, i) => (
+              <button key={i} onClick={() => setInput(ex)}
+                className="text-xs px-3 py-1.5 rounded-full transition-all hover:bg-blue-50"
+                style={{ background: 'white', color: '#4B5563', border: '1px solid #E5E7EB' }}>
+                Ejemplo {i + 1}
+              </button>
+            ))}
           </div>
-          <textarea ref={textareaRef} value={input} onChange={e => setInput(e.target.value)}
-            rows={5} placeholder="Escribe o pega aquí el mensaje del cliente..."
-            className="w-full rounded-lg p-3 text-sm"
-            style={{ background: 'rgba(5,12,26,0.8)', border: '1px solid #1a3055', color: '#c8d8f0', fontFamily: 'var(--font-body)' }}
-            onKeyDown={e => { if (e.key === 'Enter' && e.metaKey) analyze(); }} />
-          <div className="flex items-center justify-between mt-3">
-            <div className="flex gap-2 flex-wrap">
-              {examples.slice(0, 3).map((ex, i) => (
-                <button key={i} onClick={() => setInput(ex)}
-                  className="text-xs px-2 py-1 rounded-md transition-all"
-                  style={{ background: 'rgba(74,125,232,0.08)', color: '#6FA8F5', border: '1px solid rgba(74,125,232,0.2)' }}>
-                  Ejemplo {i + 1}
-                </button>
-              ))}
-            </div>
-            <button onClick={analyze} disabled={loading || !input.trim()}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all"
-              style={{ background: input.trim() && !loading ? 'linear-gradient(135deg, #4A7DE8, #7FFFD4)' : '#1a3055', color: input.trim() && !loading ? '#050c1a' : '#3a5070', cursor: input.trim() && !loading ? 'pointer' : 'not-allowed' }}>
-              {loading ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Analizando...</> : '✦ Analizar mensaje'}
-            </button>
-          </div>
+          <button onClick={analyze} disabled={loading || !input.trim()}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-200"
+            style={{ 
+              background: input.trim() && !loading ? 'var(--ash-primary)' : '#E5E7EB', 
+              color: 'white', 
+              opacity: input.trim() && !loading ? 1 : 0.6,
+              cursor: input.trim() && !loading ? 'pointer' : 'not-allowed' 
+            }}>
+            {loading ? <><div className="spinner" style={{ width: 16, height: 16, borderTopColor: 'white' }} /> Analizando...</> : '✦ Sugerir respuesta'}
+          </button>
         </div>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="rounded-xl p-4" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
-          <p className="text-sm" style={{ color: '#f87171' }}>⚠ {error}</p>
-          <p className="text-xs mt-1" style={{ color: '#6b7280' }}>Verifica que ANTHROPIC_API_KEY está configurada en las variables de entorno de Vercel.</p>
+        <div className="rounded-xl p-4 bg-red-50 border border-red-100">
+          <p className="text-sm font-medium text-red-600">⚠ {error}</p>
         </div>
       )}
 
       {/* Results */}
       {result && (
-        <div className="fade-in space-y-4">
+        <div className="fade-in space-y-6">
           {/* Meta row */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="rounded-xl p-3" style={{ background: 'rgba(74,125,232,0.08)', border: '1px solid #1a3055' }}>
-              <div className="text-xs mb-1" style={{ color: '#4a6080', fontFamily: 'var(--font-mono)' }}>ETAPA</div>
-              <div className="text-sm font-medium" style={{ color: '#6FA8F5' }}>{result.stage}</div>
+            <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">ETAPA</div>
+              <div className="text-sm font-bold text-blue-600">{result.stage}</div>
             </div>
-            <div className="rounded-xl p-3" style={{ background: 'rgba(74,125,232,0.08)', border: '1px solid #1a3055' }}>
-              <div className="text-xs mb-1" style={{ color: '#4a6080', fontFamily: 'var(--font-mono)' }}>CONFIANZA</div>
-              <div className="text-sm font-medium" style={{ color: '#e2eaf8' }}>{result.stage_confidence}%</div>
-              <div className="score-bar mt-1" style={{ width: `${result.stage_confidence}%` }} />
+            <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">CONFIANZA</div>
+              <div className="text-sm font-bold text-gray-800">{result.stage_confidence}%</div>
+              <div className="w-full h-1 bg-gray-100 rounded-full mt-2 overflow-hidden">
+                <div className="h-full bg-blue-500 transition-all duration-1000" style={{ width: `${result.stage_confidence}%` }} />
+              </div>
             </div>
-            <div className="rounded-xl p-3" style={{ background: sentimentConfig[result.sentiment]?.bg || 'rgba(74,125,232,0.08)', border: '1px solid #1a3055' }}>
-              <div className="text-xs mb-1" style={{ color: '#4a6080', fontFamily: 'var(--font-mono)' }}>SENTIMIENTO</div>
-              <div className="text-sm font-medium" style={{ color: sentimentConfig[result.sentiment]?.color || '#e2eaf8' }}>
+            <div className="rounded-2xl p-4 shadow-sm border border-gray-100" style={{ background: sentimentConfig[result.sentiment]?.bg || 'white' }}>
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">SENTIMIENTO</div>
+              <div className="text-sm font-bold" style={{ color: sentimentConfig[result.sentiment]?.color || '#1F2937' }}>
                 {sentimentConfig[result.sentiment]?.label || result.sentiment}
               </div>
             </div>
-            <div className="rounded-xl p-3" style={{ background: 'rgba(74,125,232,0.08)', border: '1px solid #1a3055' }}>
-              <div className="text-xs mb-1" style={{ color: '#4a6080', fontFamily: 'var(--font-mono)' }}>URGENCIA</div>
-              <div className="flex items-center gap-1 mt-1">
+            <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">URGENCIA</div>
+              <div className="flex items-center gap-1.5 mt-2">
                 {[1,2,3,4,5].map(i => (
-                  <div key={i} className="h-2 rounded-sm flex-1"
-                    style={{ background: i <= result.urgency_level ? '#4A7DE8' : '#1a3055' }} />
+                  <div key={i} className="h-2 rounded-full flex-1"
+                    style={{ background: i <= result.urgency_level ? 'var(--ash-primary)' : '#F3F4F6' }} />
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Key signals */}
-          {result.key_signals?.length > 0 && (
-            <div className="rounded-xl p-3" style={{ background: 'rgba(13,31,60,0.6)', border: '1px solid #1a3055' }}>
-              <div className="text-xs mb-2 section-title">Señales detectadas</div>
-              <div className="flex gap-2 flex-wrap">
-                {result.key_signals.map((s, i) => <Tag key={i} color="blue">{s}</Tag>)}
-              </div>
-            </div>
-          )}
-
-          {/* Response tabs */}
-          <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #1a3055' }}>
-            <div className="flex" style={{ background: '#0a1628', borderBottom: '1px solid #1a3055' }}>
+          <div className="card-elegant rounded-2xl overflow-hidden bg-white">
+            <div className="flex border-b border-gray-100 overflow-x-auto scroller-hidden">
               {result.responses?.map((r, i) => (
                 <button key={i} onClick={() => setActiveResponse(i)}
-                  className="flex-1 py-3 px-2 text-xs font-medium transition-all"
+                  className="flex-shrink-0 px-6 py-4 text-xs font-bold transition-all border-b-2"
                   style={{
-                    background: activeResponse === i ? 'rgba(74,125,232,0.12)' : 'transparent',
-                    color: activeResponse === i ? '#7FFFD4' : '#4a6080',
-                    borderBottom: activeResponse === i ? '2px solid #7FFFD4' : '2px solid transparent',
-                    fontFamily: 'var(--font-mono)'
+                    backgroundColor: activeResponse === i ? '#F0F7FF' : 'transparent',
+                    color: activeResponse === i ? 'var(--ash-primary)' : '#9CA3AF',
+                    borderColor: activeResponse === i ? 'var(--ash-primary)' : 'transparent',
                   }}>
-                  #{i + 1} — {r.score}pts
+                  OPCIÓN #{i + 1} ({r.score}%)
                 </button>
               ))}
             </div>
             {result.responses?.[activeResponse] && (
-              <div className="p-4" style={{ background: 'rgba(5,12,26,0.8)' }}>
-                <div className="flex items-start justify-between mb-3">
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-6">
                   <div>
                     <Tag color="mint">{result.responses[activeResponse].technique_tag}</Tag>
-                    <p className="text-sm font-medium mt-2" style={{ color: '#e2eaf8', fontFamily: 'var(--font-display)' }}>
+                    <h3 className="text-lg font-bold mt-2 text-gray-900">
                       {result.responses[activeResponse].technique}
-                    </p>
+                    </h3>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold" style={{ fontFamily: 'var(--font-mono)', color: '#4A7DE8' }}>
+                    <div className="text-3xl font-black text-blue-600">
                       {result.responses[activeResponse].score}
                     </div>
-                    <div className="text-xs" style={{ color: '#4a6080' }}>score</div>
+                    <div className="text-[10px] font-bold text-gray-400 uppercase">CALIDAD</div>
                   </div>
                 </div>
-                <div className="score-bar mb-4" style={{ width: `${result.responses[activeResponse].score}%` }} />
-                <p className="text-xs mb-3 italic" style={{ color: '#6FA8F5' }}>
-                  {result.responses[activeResponse].reasoning}
-                </p>
-                <MsgBlock text={result.responses[activeResponse].message} color="mint" />
+                
+                <div className="bg-blue-50/50 rounded-xl p-4 mb-6 border border-blue-100/50">
+                  <p className="text-sm leading-relaxed text-blue-800 italic">
+                    <span className="font-bold not-italic mr-2">Estrategia:</span>
+                    {result.responses[activeResponse].reasoning}
+                  </p>
+                </div>
+
+                <MsgBlock text={result.responses[activeResponse].message} color="blue" />
               </div>
             )}
           </div>
 
           {/* Next step */}
           {result.next_step && (
-            <div className="rounded-xl p-4" style={{ background: 'rgba(127,255,212,0.05)', border: '1px solid rgba(127,255,212,0.15)' }}>
-              <div className="section-title mb-1" style={{ color: '#7FFFD4' }}>Siguiente paso recomendado</div>
-              <p className="text-sm" style={{ color: '#c8d8f0' }}>{result.next_step}</p>
+            <div className="rounded-2xl p-5 bg-emerald-50 border border-emerald-100">
+              <div className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1">PROTIP DE SEGUIMIENTO</div>
+              <p className="text-sm font-medium text-emerald-900">{result.next_step}</p>
             </div>
           )}
         </div>
@@ -626,28 +635,33 @@ function AIAnalyzer() {
 
 function TechniquesSection() {
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {TECHNIQUES.map(t => (
         <Collapsible key={t.id} icon={t.icon} title={t.name} badge={t.badge} badgeColor={t.badgeColor}>
-          <div className="space-y-3">
-            <p className="text-xs" style={{ color: '#7a9bbf' }}>{t.sub}</p>
+          <div className="space-y-4">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{t.sub}</p>
             <div className="flex gap-2 flex-wrap">
               <Tag color="blue">{t.origin}</Tag>
               <Tag color="green">{t.use}</Tag>
               <Tag color="purple">{t.type}</Tag>
             </div>
-            <p className="text-sm leading-relaxed" style={{ color: '#8cb0d4' }}>{t.desc}</p>
-            <div className="rounded-lg p-3 text-xs" style={{ background: 'rgba(74,125,232,0.06)', border: '1px solid #1a3055', color: '#8cb0d4', fontFamily: 'var(--font-mono)' }}>
-              <span style={{ color: '#4A7DE8' }}>Fórmula: </span>{t.formula}
+            <p className="text-sm leading-relaxed text-gray-600">{t.desc}</p>
+            <div className="rounded-xl p-4 text-xs bg-gray-50 border border-gray-100 text-gray-700 font-medium leading-relaxed">
+              <span className="text-blue-600 font-bold block mb-1">Estructura Sugerida: </span>{t.formula}
             </div>
             {t.messages ? (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {t.messages.map((m, i) => <MsgBlock key={i} text={m.text} color={m.color} />)}
               </div>
             ) : (
               <MsgBlock text={t.message} />
             )}
-            {t.note && <p className="text-xs italic" style={{ color: '#4a6080' }}>💡 {t.note}</p>}
+            {t.note && (
+              <div className="flex items-center gap-2 p-3 bg-blue-50/30 rounded-lg border border-blue-100/30">
+                <span className="text-sm">💡</span>
+                <p className="text-xs font-medium text-blue-800">{t.note}</p>
+              </div>
+            )}
           </div>
         </Collapsible>
       ))}
@@ -656,15 +670,19 @@ function TechniquesSection() {
 }
 
 function FlowSection() {
-  const colorMap = { blue: '#4A7DE8', mint: '#7FFFD4', amber: '#f59e0b', purple: '#a78bfa' };
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {FLOW_STEPS.map(s => (
         <Collapsible key={s.n} icon={`${s.n}`} title={`Paso ${s.n}: ${s.title}`} badge={s.tag} badgeColor={s.color}>
-          <div className="space-y-3">
+          <div className="space-y-4">
             <Tag color="purple">{s.tech}</Tag>
             <MsgBlock text={s.message} color={s.color} />
-            {s.note && <p className="text-xs italic" style={{ color: '#4a6080' }}>💡 {s.note}</p>}
+            {s.note && (
+              <div className="flex items-center gap-2 p-3 bg-blue-50/30 rounded-lg border border-blue-100/30">
+                <span className="text-sm">💡</span>
+                <p className="text-xs font-medium text-blue-800">{s.note}</p>
+              </div>
+            )}
           </div>
         </Collapsible>
       ))}
@@ -674,7 +692,7 @@ function FlowSection() {
 
 function ObjectionsSection() {
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {OBJECTIONS.map((o, i) => (
         <Collapsible key={i} icon="⚡" title={o.q} badge={o.tech} badgeColor="amber">
           <MsgBlock text={o.a} color="amber" />
@@ -686,13 +704,18 @@ function ObjectionsSection() {
 
 function ReactivationSection() {
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {REACTIVATION.map(r => (
         <Collapsible key={r.n} icon={`${r.n}`} title={`Paso ${r.n}: ${r.title}`} badge={`Espera: ${r.when}`} badgeColor="amber">
-          <div className="space-y-3">
+          <div className="space-y-4">
             <Tag color="purple">{r.tech}</Tag>
             <MsgBlock text={r.message} color="mint" />
-            {r.note && <p className="text-xs italic" style={{ color: '#4a6080' }}>💡 {r.note}</p>}
+            {r.note && (
+              <div className="flex items-center gap-2 p-3 bg-blue-50/30 rounded-lg border border-blue-100/30">
+                <span className="text-sm">💡</span>
+                <p className="text-xs font-medium text-blue-800">{r.note}</p>
+              </div>
+            )}
           </div>
         </Collapsible>
       ))}
@@ -702,14 +725,13 @@ function ReactivationSection() {
 
 function RulesSection() {
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {RULES.map((r, i) => (
-        <div key={i} className="card-hover flex gap-4 p-4 rounded-xl"
-          style={{ background: 'rgba(13,31,60,0.6)' }}>
-          <span className="text-xl flex-shrink-0">{r.icon}</span>
+        <div key={i} className="card-elegant flex gap-4 p-5 rounded-2xl bg-white">
+          <span className="text-2xl w-12 h-12 flex items-center justify-center rounded-xl bg-gray-50 flex-shrink-0">{r.icon}</span>
           <div>
-            <p className="text-sm font-medium mb-1" style={{ color: '#e2eaf8', fontFamily: 'var(--font-display)' }}>{r.text}</p>
-            <p className="text-xs leading-relaxed" style={{ color: '#6a8baa' }}>{r.detail}</p>
+            <p className="text-sm font-bold mb-1 text-gray-900" style={{ fontFamily: 'var(--font-display)' }}>{r.text}</p>
+            <p className="text-xs leading-relaxed text-gray-500 font-medium">{r.detail}</p>
           </div>
         </div>
       ))}
@@ -719,39 +741,43 @@ function RulesSection() {
 
 function TrackingSection() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <p className="section-title mb-3">Métricas norte — Fase 1</p>
-        <div className="grid grid-cols-3 gap-3">
+        <p className="section-title mb-4">Métricas de Rendimiento</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {TRACKING_METRICS.map((m, i) => (
-            <div key={i} className="rounded-xl p-4 text-center" style={{ background: 'rgba(13,31,60,0.6)', border: '1px solid #1a3055' }}>
-              <div className="text-xl font-bold mb-1" style={{ fontFamily: 'var(--font-mono)', color: '#4A7DE8' }}>{m.val}</div>
-              <div className="text-xs" style={{ color: '#4a6080' }}>{m.label}</div>
+            <div key={i} className="card-elegant rounded-2xl p-5 text-center bg-white">
+              <div className="text-2xl font-black mb-1 text-blue-600" style={{ fontFamily: 'var(--font-mono)' }}>{m.val}</div>
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">{m.label}</div>
             </div>
           ))}
         </div>
       </div>
       <div>
-        <p className="section-title mb-3">Etiqueta cada lead en tu DM</p>
-        <div className="space-y-2">
+        <p className="section-title mb-4">Etiquetado de Leads</p>
+        <div className="space-y-3">
           {LEAD_LABELS.map((l, i) => (
-            <div key={i} className="flex gap-3 p-3 rounded-xl" style={{ background: 'rgba(13,31,60,0.6)', border: '1px solid #1a3055' }}>
-              <span className="text-sm w-5 flex-shrink-0">{l.dot}</span>
+            <div key={i} className="card-elegant flex gap-4 p-4 rounded-2xl bg-white">
+              <span className="text-lg w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 flex-shrink-0">{l.dot}</span>
               <div>
-                <span className="text-sm font-medium mr-2" style={{ color: l.color }}>{l.label}</span>
-                <span className="text-xs" style={{ color: '#6a8baa' }}>{l.desc}</span>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-sm font-bold" style={{ color: l.color }}>{l.label}</span>
+                </div>
+                <span className="text-xs font-medium text-gray-500">{l.desc}</span>
               </div>
             </div>
           ))}
         </div>
       </div>
       <div>
-        <p className="section-title mb-3">Secuencia de check-in durante el trial</p>
-        <div className="space-y-2">
+        <p className="section-title mb-4">Secuencia de Seguimiento (Trial)</p>
+        <div className="space-y-3">
           {CHECKINS.map((c, i) => (
-            <div key={i} className="flex gap-3 p-3 rounded-xl" style={{ background: 'rgba(13,31,60,0.6)', border: '1px solid #1a3055' }}>
-              <span className="text-xs font-bold w-12 flex-shrink-0 pt-0.5" style={{ fontFamily: 'var(--font-mono)', color: '#4A7DE8' }}>{c.day}</span>
-              <p className="text-xs leading-relaxed" style={{ color: '#8cb0d4' }}>{c.msg}</p>
+            <div key={i} className="card-elegant flex gap-4 p-5 rounded-2xl bg-white">
+              <div className="flex-shrink-0 pt-0.5">
+                <span className="text-[11px] font-black px-2 py-1 rounded bg-blue-100 text-blue-700" style={{ fontFamily: 'var(--font-mono)' }}>{c.day}</span>
+              </div>
+              <p className="text-sm leading-relaxed text-gray-600 font-medium">{c.msg}</p>
             </div>
           ))}
         </div>
@@ -789,40 +815,39 @@ export default function App() {
   const currentNav = NAV.find(n => n.id === active);
 
   return (
-    <div className="grid-bg min-h-screen flex">
+    <div className="grid-bg min-h-screen flex bg-[#F9FAFB]">
       {/* Sidebar Desktop */}
-      <aside className="hidden md:flex flex-col w-60 flex-shrink-0"
-        style={{ background: 'rgba(5,12,26,0.95)', borderRight: '1px solid #1a3055', position: 'sticky', top: 0, height: '100vh' }}>
+      <aside className="hidden md:flex flex-col w-64 flex-shrink-0 bg-white border-r border-gray-200 sticky top-0 h-screen">
         {/* Logo */}
-        <div className="p-6 pb-4" style={{ borderBottom: '1px solid #1a3055' }}>
-          <div className="flex items-center gap-3 mb-1">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold"
-              style={{ background: 'linear-gradient(135deg, #4A7DE8, #7FFFD4)', color: '#050c1a' }}>A</div>
+        <div className="p-8 pb-6 border-b border-gray-50">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg font-black shadow-lg shadow-blue-100"
+              style={{ background: 'var(--ash-primary)', color: 'white' }}>A</div>
             <div>
-              <div className="font-bold text-sm" style={{ fontFamily: 'var(--font-display)', color: '#e2eaf8' }}>ASHIRA</div>
-              <div className="text-xs" style={{ color: '#4a6080' }}>Sales Intelligence</div>
+              <div className="font-black text-sm tracking-tight text-gray-900" style={{ fontFamily: 'var(--font-display)' }}>ASHIRA</div>
+              <div className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Intelligence</div>
             </div>
           </div>
         </div>
         {/* Nav */}
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
           {NAV.map(item => (
             <button key={item.id} onClick={() => setActive(item.id)}
-              className={`nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm transition-all ${active === item.id ? 'active' : ''}`}
-              style={{ color: active === item.id ? '#7FFFD4' : '#4a6080', fontFamily: 'var(--font-body)' }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>{item.icon}</span>
-              {item.label}
+              className={`nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm transition-all duration-200 ${active === item.id ? 'active shadow-sm shadow-blue-50' : 'text-gray-500 hover:bg-gray-50'}`}
+              style={{ fontFamily: 'var(--font-body)' }}>
+              <span className="text-base">{item.icon}</span>
+              <span className="font-bold">{item.label}</span>
             </button>
           ))}
         </nav>
         {/* Footer */}
-        <div className="p-4" style={{ borderTop: '1px solid #1a3055' }}>
-          <div className="flex items-center gap-2 mb-2">
-            <div className="glow-dot" style={{ width: 6, height: 6 }} />
-            <span className="text-xs" style={{ color: '#4a6080' }}>IA activa</span>
+        <div className="p-6 border-t border-gray-50">
+          <div className="flex items-center gap-2 mb-2 bg-blue-50 p-2 rounded-lg border border-blue-100">
+            <div className="spinner" style={{ width: 12, height: 12, borderWidth: 1 }} />
+            <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider">IA Engine Active</span>
           </div>
-          <p className="text-xs leading-relaxed" style={{ color: '#2a4060' }}>
-            Powered by Claude Sonnet 4
+          <p className="text-[10px] font-medium text-gray-400 mt-2 text-center">
+            ASHIRA Playbook © 2026
           </p>
         </div>
       </aside>
@@ -830,33 +855,35 @@ export default function App() {
       {/* Main */}
       <main className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <header className="sticky top-0 z-40 flex items-center justify-between px-6 py-4"
-          style={{ background: 'rgba(5,12,26,0.95)', borderBottom: '1px solid #1a3055', backdropFilter: 'blur(12px)' }}>
-          <div className="flex items-center gap-3">
+        <header className="sticky top-0 z-40 flex items-center justify-between px-8 py-5 bg-white/70 border-b border-gray-100 backdrop-blur-xl">
+          <div className="flex items-center gap-4">
             {/* Mobile menu button */}
-            <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden p-2 rounded-lg" style={{ color: '#4A7DE8' }}>☰</button>
+            <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden p-2 rounded-xl bg-gray-50 text-blue-600">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
             <div>
-              <h1 className="text-base font-bold" style={{ fontFamily: 'var(--font-display)', color: '#e2eaf8' }}>
-                {currentNav?.icon} {currentNav?.label}
-              </h1>
-              <p className="text-xs" style={{ color: '#4a6080' }}>ASHIRA Sales Playbook 2026</p>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">{currentNav?.icon}</span>
+                <h1 className="text-lg font-black tracking-tight text-gray-900" style={{ fontFamily: 'var(--font-display)' }}>
+                  {currentNav?.label}
+                </h1>
+              </div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">ASHIRA Sales Playbook</p>
             </div>
           </div>
           <a href="https://ashira.click/register" target="_blank" rel="noopener noreferrer"
-            className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all"
-            style={{ background: 'rgba(74,125,232,0.1)', color: '#6FA8F5', border: '1px solid rgba(74,125,232,0.2)' }}>
-            ashira.click/register ↗
+            className="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all bg-white border border-gray-200 text-gray-700 shadow-sm hover:shadow-md hover:border-blue-200 hover:text-blue-600">
+            Acceso Directo ↗
           </a>
         </header>
 
         {/* Mobile menu */}
         {menuOpen && (
-          <div className="md:hidden p-3 space-y-1" style={{ background: 'rgba(5,12,26,0.98)', borderBottom: '1px solid #1a3055' }}>
+          <div className="md:hidden p-4 space-y-2 bg-white border-b border-gray-100 shadow-xl animate-in slide-in-from-top duration-300">
             {NAV.map(item => (
               <button key={item.id} onClick={() => { setActive(item.id); setMenuOpen(false); }}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm"
-                style={{ color: active === item.id ? '#7FFFD4' : '#4a6080', background: active === item.id ? 'rgba(127,255,212,0.08)' : 'transparent' }}>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>{item.icon}</span>
+                className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-left text-sm font-bold ${active === item.id ? 'bg-blue-50 text-blue-700' : 'text-gray-500'}`}>
+                <span>{item.icon}</span>
                 {item.label}
               </button>
             ))}
@@ -864,7 +891,7 @@ export default function App() {
         )}
 
         {/* Content */}
-        <div className="flex-1 p-6 max-w-3xl mx-auto w-full">
+        <div className="flex-1 p-8 max-w-4xl mx-auto w-full">
           <div key={active} className="fade-in">
             {SECTION_COMPONENTS[active]}
           </div>

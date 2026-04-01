@@ -1,6 +1,7 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.API_GEMINI || process.env.ANTHROPIC_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 const PLAYBOOK = {
   stages: [
@@ -142,15 +143,13 @@ Formato exacto:
   "next_step": "Acción concreta recomendada después de enviar la respuesta #1"
 }`;
 
-    const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1800,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: `Analiza este mensaje del prospecto:\n\n"${message}"\n\nScores del análisis local: ${JSON.stringify(localScores)}\n\nGenera las 3 mejores respuestas del playbook ASHIRA.` }],
-    });
+    const prompt = `${systemPrompt}\n\nAnaliza este mensaje del prospecto:\n\n"${message}"\n\nScores del análisis local: ${JSON.stringify(localScores)}\n\nGenera las 3 mejores respuestas del playbook ASHIRA.`;
 
-    const raw = response.content[0].text.trim();
-    const jsonStr = raw.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
+    const result_gen = await model.generateContent(prompt);
+    const response = await result_gen.response;
+    const text = response.text();
+
+    const jsonStr = text.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
     const result = JSON.parse(jsonStr);
 
     return Response.json({ ...result, local_scores: localScores });
