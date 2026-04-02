@@ -160,8 +160,22 @@ Formato exacto:
     const raw = response.content[0].text.trim();
     const clean = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
     const result = JSON.parse(clean);
+    
+    // Cost calculation ($3/M input, $15/M output)
+    const inputCost = (response.usage.input_tokens / 1000000) * 3;
+    const outputCost = (response.usage.output_tokens / 1000000) * 15;
 
-    return Response.json({ ...result, local_scores: localScores });
+    return Response.json({
+      ...result,
+      local_scores: localScores,
+      usage: {
+        input_tokens: response.usage.input_tokens,
+        output_tokens: response.usage.output_tokens,
+        input_cost: inputCost,
+        output_cost: outputCost,
+        total_cost: inputCost + outputCost
+      }
+    });
   } catch (err) {
     console.error('ASHIRA Analyze Error:', err);
     let errorMsg = 'Error al analizar el mensaje.';

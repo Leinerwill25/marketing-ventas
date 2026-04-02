@@ -1,7 +1,13 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
 
-// ─── DATA ─────────────────────────────────────────────────────────────────────
+import React, { useState, useRef, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+
+// Dynamic import for CostTracker to avoid hydration issues
+const CostTracker = dynamic(() => import('../components/CostTracker'), { ssr: false });
+import { trackUsage } from '../components/CostTracker';
+
+// --- DATA ORIGINAL (RESTORED) ---
 
 const TECHNIQUES = [
   {
@@ -68,14 +74,14 @@ Y lo que encontraron cuando empezaron a usar ASHIRA es que en las primeras seman
     note: 'La "prueba encontrada" debe ser específica. SafeCare es tu mejor arma aquí.',
   },
   {
-    id: 'yescalado', icon: '📶', name: 'Sí Escalonado',
+    id: 'yescalado', icon: '📱', name: 'Sí Escalonado',
     sub: 'Micro-compromisos que llevan al gran sí',
     badge: 'Leads tibios', badgeColor: 'green',
     origin: 'Robert Cialdini, Influence 1984', use: 'Leads fríos o tibios', type: 'Psicología de compromiso',
     desc: 'Cada pequeño "sí" crea coherencia interna. No empieces pidiendo el registro; empieza pidiendo algo pequeño.',
     formula: 'Pregunta fácil → pregunta de dolor → pregunta de visión → CTA de bajo riesgo (trial) → CTA de compra',
     messages: [
-      { color: 'blue', text: '¿Tienes consultorio propio o trabajas en una clínica? 🙂' },
+      { color: 'blue', text: '¿Tienes consultorio propio o trabajas en una clínica? 🖐️' },
       { color: 'mint', text: '[Responde] ¿Y cómo llevas hoy el control de las citas — digital, en papel, o mezcla de los dos?' },
       { color: 'amber', text: '[Responde] ¿Te ha pasado alguna vez perder o retrasar algo importante por no encontrar un historial a tiempo?' },
       { color: 'blue', text: '[Responde] Perfecto — entonces ASHIRA es exactamente para ti. ¿Empezamos con los 15 días gratis?\n👉 https://ashira.click/register' },
@@ -83,7 +89,7 @@ Y lo que encontraron cuando empezaron a usar ASHIRA es que en las primeras seman
     note: 'Cuatro síes pequeños hacen el quinto (el registro) mucho más fácil.',
   },
   {
-    id: 'challenger', icon: '⚡', name: 'Challenger',
+    id: 'challenger', icon: '💡', name: 'Challenger',
     sub: 'Enseñar → Adaptar → Tomar control',
     badge: 'Directores', badgeColor: 'purple',
     origin: 'CEB, The Challenger Sale 2011', use: 'Decisores institucionales', type: 'Venta disruptiva',
@@ -95,7 +101,7 @@ El 70% del tiempo administrativo en clínicas privadas se pierde en 3 tareas: bu
 
 No es un problema de personal — es un problema de sistema. Y la mayoría de las clínicas lo resuelven contratando más recepcionistas, cuando la solución real es centralizar.
 
-¿Cuánto tiempo está perdiendo tu equipo en esas tres cosas hoy? Con gusto te hago el cálculo. 📊`,
+¿Cuánto tiempo está perdiendo tu equipo en esas tres cosas hoy? Con gusto te hago el cálculo. 📋`,
     note: 'No empieces hablando de ASHIRA. Empieza con el insight.',
   },
   {
@@ -113,7 +119,7 @@ Te comparto algo que les ha funcionado muy bien a otros consultorios: una checkl
     note: 'El regalo puede ser un PDF, checklist o dato. El registro llega en el segundo o tercer mensaje.',
   },
   {
-    id: 'alternativo', icon: '🔀', name: 'Cierre Alternativo',
+    id: 'alternativo', icon: '🔄', name: 'Cierre Alternativo',
     sub: 'No preguntes si — pregunta cuál',
     badge: 'Cierre', badgeColor: 'green',
     origin: 'Zig Ziglar, ventas clásicas', use: 'Momento de cierre', type: 'Decisión guiada',
@@ -143,7 +149,7 @@ Son 20 minutos por videollamada que normalmente no podemos ofrecer a todos, pero
 
 const FLOW_STEPS = [
   { n: 1, title: 'Bienvenida', tag: 'Gancho inmediato', color: 'blue', tech: 'Espejo de dolor + CTA directo',
-    message: `¡Hola [nombre]! 👋 Gracias por escribirnos, qué bueno que estás aquí.
+    message: `¡Hola [nombre]! 👋 Gracias por escribirnos, qué bueno que estés aquí.
 
 Somos ASHIRA — la plataforma creada para que médicos y clínicas dejen de perder tiempo en lo administrativo y lo pongan donde vale: en sus pacientes.
 
@@ -151,7 +157,7 @@ Con ASHIRA puedes:
 🏥 Centralizar todos los historiales médicos en un solo lugar seguro
 📅 Gestionar citas sin errores ni doble agendamiento
 📂 Olvidarte de buscar por cuál correo llegó tal documento
-⚡ Mantener a recepción, enfermería y médicos coordinados en tiempo real
+💡 Mantener a recepción, enfermería y médicos coordinados en tiempo real
 
 Y para que lo veas con tus propios ojos, te damos 15 días completamente GRATIS:
 👉 https://ashira.click/register
@@ -166,7 +172,7 @@ Sin tarjeta. Sin contratos. Solo entra y prueba.
 
 Cuéntame un poco — ¿cómo manejas hoy las citas y los historiales de tus pacientes? ¿Usas algún sistema o lo llevas manual/en Excel? 📋
 
-─────────────────────
+—————————————————————
 [Si trabaja en clínica]
 ¡Genial! Para clínicas ASHIRA es especialmente poderoso porque centraliza a todo el equipo.
 
@@ -175,7 +181,7 @@ Cuéntame un poco — ¿cómo manejas hoy las citas y los historiales de tus pac
   { n: 3, title: 'Amplificación del dolor', tag: 'Urgencia real', color: 'mint', tech: 'Costo de la inacción',
     message: `Entiendo perfectamente. La mayoría de los consultorios que nos contactan llevan años así — con Excel, WhatsApp y correos mezclados, y funcionan… pero a un costo enorme de tiempo y errores que no siempre se ven.
 
-Dime, ¿cuántas horas a la semana crees que pierde tu equipo buscando información de pacientes, confirmando citas o resolviendo confusiones? 🤔
+Dime, ¿cuántas horas a la semana crees que pierde tu equipo buscando información de pacientes, con firmando citas o resolviendo confusiones? 🤔
 
 Te lo pregunto porque cuando lo calculamos con nuestros clientes, el número siempre sorprende.`,
     note: 'Esta pregunta hace que el prospecto CALCULE su propio dolor. La urgencia se descubre, no se crea.' },
@@ -342,20 +348,20 @@ Si algo no funcionó o tienes una pregunta antes de entrar, cuéntame aquí y lo
 ];
 
 const RULES = [
-  { icon: '⚡', text: 'Responde en menos de 5 minutos.', detail: 'El 85% de los prospectos elige al primer proveedor que responde. En Instagram, la velocidad es ventaja competitiva directa.' },
+  { icon: '💡', text: 'Responde en menos de 5 minutos.', detail: 'El 85% de los prospectos elige al primer proveedor que responde. En Instagram, la velocidad es ventaja competitiva directa.' },
   { icon: '🎯', text: 'Un mensaje = una acción.', detail: 'Cada mensaje debe tener un solo CTA claro. Múltiples opciones generan parálisis. Decide por ellos: "¿Lo probamos hoy?"' },
-  { icon: '👂', text: 'Escucha más de lo que hablas.', detail: 'El 70% de la decisión ya está tomada antes de que intervengas. Tu rol es descubrir qué los frena, no convencerlos desde cero.' },
+  { icon: '🎧', text: 'Escucha más de lo que hablas.', detail: 'El 70% de la decisión ya está tomada antes de que intervengas. Tu rol es descubrir qué los frena, no convencerlos desde cero.' },
   { icon: '🚫', text: 'Nunca menciones el precio solo.', detail: 'Siempre envuelto: beneficio → precio → beneficio → pregunta. El precio desnudo siempre parece caro.' },
   { icon: '💬', text: 'Las objeciones son señales de interés.', detail: '"Está caro" significa "convénceme". "Lo pienso" significa "tengo una duda que no dije". Siempre pregunta qué hay detrás.' },
   { icon: '📖', text: 'Usa historias, no características.', detail: '"SafeCare ahora coordina a sus médicos en tiempo real" > "ASHIRA tiene módulo de coordinación de equipos". Las historias venden, los features no.' },
-  { icon: '⏰', text: 'La urgencia debe ser real.', detail: '"Cupos de onboarding limitados" es verdad para ti. "Oferta expira hoy" sin que expire destruye la confianza y el médico no vuelve.' },
+  { icon: '⏳', text: 'La urgencia debe ser real.', detail: '"Cupos de onboarding limitados" es verdad para ti. "Oferta expira hoy" sin que expire destruye la confianza y el médico no vuelve.' },
   { icon: '🔄', text: 'Máximo 2 follow-ups sin respuesta.', detail: 'El tercero sin respuesta cierra el lead. No persigas — reabre con valor y si no hay eco, pasa al siguiente.' },
   { icon: '🤝', text: 'Califica antes de vender.', detail: 'Pregunta quién es, qué usa hoy y qué tamaño tiene su operación. Un mensaje personalizado convierte 3x más que uno genérico.' },
-  { icon: '😊', text: 'Sé humano, no vendedor.', detail: 'Los médicos tienen radar muy afinado para detectar scripts. El tono conversacional genera más confianza que el copy perfecto.' },
+  { icon: '🙂', text: 'Sé humano, no vendedor.', detail: 'Los médicos tienen radar muy afinado para detectar scripts. El tono conversacional genera más confianza que el copy perfecto.' },
 ];
 
 const TRACKING_METRICS = [
-  { val: '<5\'', label: 'Tiempo de primera respuesta' },
+  { val: "<5'", label: 'Tiempo de primera respuesta' },
   { val: '30%', label: 'Meta: info → registro' },
   { val: '2x', label: 'Máximo follow-ups' },
   { val: '+50', label: 'NPS de usuarios meta' },
@@ -365,7 +371,7 @@ const TRACKING_METRICS = [
 
 const LEAD_LABELS = [
   { color: '#4A7DE8', dot: '🔵', label: 'Caliente', desc: 'Respondió, hizo preguntas, pidió más info o el precio. Prioridad máxima — cerrar en 24–48h.' },
-  { color: '#f59e0b', dot: '🟡', label: 'Tibio', desc: 'Leyó y no respondió, o dijo "lo pienso". Follow-up en 24h con nuevo ángulo de valor.' },
+  { color: '#f59e0b', dot: '🟠', label: 'Tibio', desc: 'Leyó y no respondió, o dijo "lo pienso". Follow-up en 24h con nuevo ángulo de valor.' },
   { color: '#7FFFD4', dot: '🟢', label: 'Trial activo', desc: 'Se registró. Check-in al día 3, al día 7 y al día 13 antes de que venza el trial.' },
   { color: '#ef4444', dot: '🔴', label: 'Cerrado', desc: '2 follow-ups sin respuesta o rechazo explícito. Archivar. Reactivar en 30 días.' },
 ];
@@ -376,7 +382,60 @@ const CHECKINS = [
   { day: 'Día 13', msg: '"Tu prueba gratuita termina mañana. ¿Seguimos juntos? [Link de pago o plan]. Si tienes alguna duda del precio o el plan, aquí estoy."' },
 ];
 
-// ─── COMPONENTS ──────────────────────────────────────────────────────────────
+// --- NUEVA DATA (SHORT & MIXED) ---
+
+const SHORT_FLOW = [
+  { 
+    n: 1, title: "Bienvenida + Anclaje + FOMO", tag: "Urgencia inmediata", color: "blue", tech: "Price Anchoring + FOMO",
+    message: "¡Hola [nombre]! 👋 Qué bueno que preguntas directamente — te voy a ser completamente honesto.\n\nASHIRA normalmente cuesta $49/mes. Pero ahora mismo estamos en precio de lanzamiento para los primeros médicos que entren a la plataforma: $20/mes.\n\n¿Por qué tan bajo? Porque estamos construyendo la comunidad de médicos venezolanos que van a liderar la digitalización del sector salud privado en el país. Y queremos que los pioneros entren con una ventaja real.\n\nEso sí — el precio de $20 no va a durar para siempre. Cuando cerremos esta fase de lanzamiento, sube.\n\n¿Tienes consultorio propio o trabajas en una clínica? Así te digo exactamente qué plan te conviene 🙂",
+    note: "El anclaje $49→$20 activa el efecto psicológico de comparación inmediato."
+  },
+  { 
+    n: 2, title: "Brecha + Pertenencia + Prueba Social", tag: "Comunidad + Valor", color: "mint", tech: "Gap Selling + Pertenencia",
+    message: "Perfecto. Entonces te cuento exactamente lo que cambia para un [consultorio/clínica como el tuyo/la tuya]:\n\nHOY: historiales en papel o Excel, citas por WhatsApp, coordinación por correo.\nCON ASHIRA: todo centralizado, accesible en segundos, desde cualquier dispositivo.\n\nLa diferencia no es solo comodidad — es tiempo. Y el tiempo en medicina es dinero y calidad de atención.\n\nYa hay médicos en Venezuela usando ASHIRA — entre ellos SafeCare. Tú puedes ser parte de la primera generación de médicos venezolanos completamente digitalizados. 💙\n\n¿Empezamos con los 15 días gratis y $20/mes después? Sin tarjeta ahora.\n👉 https://ashira.click/register",
+    note: "Posiciona al médico como un 'Líder Pionero' de la era digital."
+  },
+  { 
+    n: 3, title: "Cierre Asuntivo + Amarre", tag: "Cierre con urgencia", color: "blue", tech: "Amarre + Urgencia real",
+    message: "¡Perfecto, [nombre]! El registro toma menos de 2 minutos:\n👉 https://ashira.click/register\n\nCuando entres, empieza configurando tu primera agenda. Y como entras en esta fase de lanzamiento, el precio de $20/mes queda fijo para ti — aunque después suba para nuevos usuarios.\n\nAdemás, si entras hoy, te ayudo personalmente con los primeros pasos: 15 minutos de configuración guiada para que en tu primer día ya tengas ASHIRA corriendo.\n\n¿Lo hacemos ahora mismo? 🚀",
+    note: "Precio congelado para early adopters + acompañamiento personal."
+  },
+  { 
+    n: 4, title: "Seguimiento (12-24h)", tag: "Reactivación urgente", color: "amber", tech: "FOMO Real + Costo Cuantificado",
+    message: "¡Hola [nombre]! 👋 Te escribo porque el precio de lanzamiento de $20 va a subir pronto y quiero avisarte antes de que cambie.\n\n📊 Si tu equipo pierde 3 horas/semana en tareas administrativas → son 12 horas/mes → más de 140 horas al año perdidas en caos que ASHIRA resuelve.\n\nA $20/mes, ASHIRA te cuesta menos de lo que vale una hora de tu tiempo profesional. Y recuperas ese costo en la primera semana.\n\nSi te interesa entrar con el precio actual, aquí está el link:\n👉 https://ashira.click/register\n\nY si no es el momento, no hay problema — pero quería que la decisión la tomara con toda la info. 😊",
+    note: "El cálculo 3h/sem = 140h/año hace que el ROI sea tangible."
+  }
+];
+
+const MIXED_FLOW = [
+  {
+    n: 1, title: "Detectar y Validar la Fricción", tag: "Diagnóstico", color: "blue", tech: "Pregunta Directa",
+    message: "¡Hola [nombre]! Entiendo perfectamente — y aprecio que seas directo/a.\n\nDéjame preguntarte algo específico para ayudarte mejor: de todo lo que está en tu cabeza ahora mismo, ¿cuál de estas tres cosas es la que más te frena?\n\nA) El precio — no estoy seguro de que valga la inversión\nB) El tiempo — estoy muy ocupado para aprender algo nuevo ahora\nC) La duda — no sé si realmente funciona para mi tipo de consultorio\n\nNo hay respuesta incorrecta. Solo quiero entender bien tu situación para darte la información que realmente te sirve 🙂",
+    note: "Hacer que el prospecto elija su objeción lo compromete con ella psicológicamente."
+  },
+  {
+    n: 2, title: "Resolver Objeción (Opción A: Precio)", tag: "Precio", color: "amber", tech: "Challenger + Inacción",
+    message: "\"El precio es una preocupación válida.\n\nPero te hago un Challenger: ¿Cuántas horas pierde tu equipo por semana en caos administrativo? Si son 3 horas, al mes son 12 horas — tiempo que vale mucho más que cualquier suscripción.\n\nASHIRA no es un gasto — es un ahorro mensual. El tiempo que recuperas vale 10x lo que pagas. Y tienes 15 días gratis para comprobarlo sin riesgo. ¿Eso cambia la ecuación? 🙂\"",
+    note: "Usa el ROI tangible del tiempo recuperado."
+  },
+  {
+     n: 3, title: "Anclaje + FOMO Comunidad", tag: "Pertenencia", color: "blue", tech: "Social Proof + FOMO",
+     message: "Mira, y ya que estamos siendo directos: ASHIRA vale $49/mes, pero ahora está en $20/mes porque estamos construyendo la comunidad inicial de médicos que entienden que digitalizarse es el paso natural.\n\nCuando esta fase cierre, el precio sube. Más de [X] médicos ya están dentro de la comunidad ASHIRA. ¿Quieres ser parte de esto? 💙\n👉 https://ashira.click/register",
+     note: "El sentimiento de 'Comunidad' elimina el miedo a estar solo."
+  },
+  {
+     n: 4, title: "Cierre Alternativo", tag: "Cierre", color: "mint", tech: "Elección Guiada",
+     message: "Entonces te presento las dos opciones reales:\n\n🔵 Opción A — Entras hoy al precio de lanzamiento de $20, 15 días gratis, y decides con resultados reales. Si no te gusta, cancelas sin preguntas.\n⚪ Opción B — Lo piensas más, el precio sube al cerrar el lanzamiento, y entras después al precio normal.\n\n¿Cuál tiene más sentido para ti ahora mismo? 🙂",
+     note: "No preguntes 'si', pregunta 'cuál'."
+  },
+  {
+     n: 5, title: "Seguimiento Final (24-48h)", tag: "Reactivación", color: "purple", tech: "Garantía Personal",
+     message: "¡Hola [nombre]! Quería cerrar el loop: el precio de $20 sigue disponible por poco tiempo.\n\nTe propongo algo concreto: regístrate hoy, usa los 15 días gratis, y si en la primera semana no ves diferencia real en lo que mencionamos, me escribes y hablamos — personalmente.\n\nSin riesgo. Sin contratos. Solo 2 minutos.\n👉 https://ashira.click/register 💙",
+     note: "La garantía de relación personal es vital en LATAM."
+  }
+];
+
+// --- COMPONENTS ---
 
 function Tag({ children, color = 'blue' }) {
   const colors = {
@@ -402,11 +461,11 @@ function CopyButton({ text }) {
     <button onClick={copy}
       className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md transition-all duration-200 font-medium"
       style={{ 
-        background: copied ? 'rgba(16, 185, 129, 0.1)' : 'rgba(37, 99, 235, 0.05)', 
-        color: copied ? '#059669' : '#2563EB', 
-        border: `1px solid ${copied ? 'rgba(16, 185, 129, 0.2)' : 'rgba(37, 99, 235, 0.1)'}` 
+        background: copied ? 'rgba(16, 185, 129, 0.1)' : 'rgba(74, 125, 232, 0.05)', 
+        color: copied ? '#059669' : '#4A7DE8', 
+        border: `1px solid ${copied ? 'rgba(16, 185, 129, 0.2)' : 'rgba(74, 125, 232, 0.1)'}` 
       }}>
-      {copied ? '✓ Copiado' : '⎘ Copiar'}
+      {copied ? '✓ Copiado' : '📋 Copiar'}
     </button>
   );
 }
@@ -434,7 +493,7 @@ function Collapsible({ title, badge, badgeColor, icon, children }) {
 }
 
 function MsgBlock({ text, color = 'blue' }) {
-  const borderColors = { blue: '#2563EB', mint: '#10B981', amber: '#F59E0B', purple: '#7C3AED' };
+  const borderColors = { blue: '#4A7DE8', mint: '#10B981', amber: '#F59E0B', purple: '#7C3AED' };
   const bgColors = { blue: '#F0F7FF', mint: '#F0FDF4', amber: '#FFFBEB', purple: '#F5F3FF' };
   
   return (
@@ -451,7 +510,7 @@ function MsgBlock({ text, color = 'blue' }) {
   );
 }
 
-// ─── AI ANALYZER ─────────────────────────────────────────────────────────────
+// --- SECTIONS ---
 
 function AIAnalyzer() {
   const [input, setInput] = useState('');
@@ -459,23 +518,18 @@ function AIAnalyzer() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [activeResponse, setActiveResponse] = useState(0);
-  const textareaRef = useRef(null);
 
   const examples = [
     'Hola, vi su anuncio y me gustaría saber más sobre ASHIRA',
     'Cuánto cuesta? Tengo un consultorio con 2 médicos',
     'Ya uso Excel para todo, no sé si necesito algo más',
-    'Lo pienso y te aviso, ahorita estoy muy ocupado',
-    'Cuánto cobran? Parece interesante pero caro',
-    'Mis datos de pacientes deben ser muy privados, ¿cómo garantizan eso?',
   ];
 
   const analyze = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || loading) return;
     setLoading(true);
     setError('');
     setResult(null);
-    setActiveResponse(0);
     try {
       const res = await fetch('/api/analyze', {
         method: 'POST',
@@ -485,6 +539,7 @@ function AIAnalyzer() {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setResult(data);
+      if (data.usage) trackUsage(data.usage);
     } catch (e) {
       setError(e.message || 'Error al analizar');
     } finally {
@@ -494,144 +549,88 @@ function AIAnalyzer() {
 
   const sentimentConfig = {
     positivo: { label: 'Positivo', color: '#10B981', bg: '#F0FDF4' },
-    neutro: { label: 'Neutro', color: '#2563EB', bg: '#F0F7FF' },
+    neutro: { label: 'Neutro', color: '#4A7DE8', bg: '#F0F7FF' },
     negativo: { label: 'Negativo', color: '#EF4444', bg: '#FEF2F2' },
     con_objecion: { label: 'Con objeción', color: '#F59E0B', bg: '#FFFBEB' },
   };
 
   return (
     <div className="space-y-6">
-      {/* Input area */}
       <div className="card-elegant rounded-2xl p-6 bg-white">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-2 h-6 bg-blue-600 rounded-full" />
           <span className="section-title text-gray-900">Analizador Inteligente</span>
         </div>
-        <textarea ref={textareaRef} value={input} onChange={e => setInput(e.target.value)}
-          rows={5} placeholder="Pega aquí el mensaje del cliente para recibir consejos estratégicos..."
+        <textarea value={input} onChange={e => setInput(e.target.value)}
+          rows={5} placeholder="Pega aquí el mensaje del cliente..."
           className="w-full rounded-xl p-4 text-sm transition-all focus:ring-2 focus:ring-blue-100 outline-none"
-          style={{ background: '#F9FAFB', border: '1px solid var(--ash-border)', color: 'var(--ash-text)', fontFamily: 'var(--font-body)' }}
-          onKeyDown={e => { if (e.key === 'Enter' && e.metaKey) analyze(); }} />
+          style={{ background: '#F9FAFB', border: '1px solid var(--ash-border)', color: 'var(--ash-text)', fontFamily: 'var(--font-body)' }} />
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-4 gap-4">
-          <div className="flex gap-2 flex-wrap">
-            {examples.slice(0, 3).map((ex, i) => (
+          <div className="flex gap-2">
+            {examples.map((ex, i) => (
               <button key={i} onClick={() => setInput(ex)}
-                className="text-xs px-3 py-1.5 rounded-full transition-all hover:bg-blue-50"
-                style={{ background: 'white', color: '#4B5563', border: '1px solid #E5E7EB' }}>
+                className="text-xs px-3 py-1.5 rounded-full border border-gray-200 hover:bg-gray-50">
                 Ejemplo {i + 1}
               </button>
             ))}
           </div>
           <button onClick={analyze} disabled={loading || !input.trim()}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-200"
-            style={{ 
-              background: input.trim() && !loading ? 'var(--ash-primary)' : '#E5E7EB', 
-              color: 'white', 
-              opacity: input.trim() && !loading ? 1 : 0.6,
-              cursor: input.trim() && !loading ? 'pointer' : 'not-allowed' 
-            }}>
-            {loading ? <><div className="spinner" style={{ width: 16, height: 16, borderTopColor: 'white' }} /> Analizando...</> : '✦ Sugerir respuesta'}
+            className="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm bg-[#4A7DE8] text-white shadow-lg transition-opacity disabled:opacity-50">
+            {loading ? 'Analizando...' : '📊 Sugerir respuesta'}
           </button>
         </div>
       </div>
 
-      {/* Error */}
-      {error && (
-        <div className="rounded-xl p-4 bg-red-50 border border-red-100">
-          <p className="text-sm font-medium text-red-600">⚠ {error}</p>
-        </div>
-      )}
+      {error && <div className="p-4 bg-red-50 text-red-600 rounded-xl text-sm italic">⚠️ {error}</div>}
 
-      {/* Results */}
       {result && (
         <div className="fade-in space-y-6">
-          {/* Meta row */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
               <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">ETAPA</div>
-              <div className="text-sm font-bold text-blue-600">{result.stage}</div>
+              <div className="text-sm font-bold text-blue-600 tracking-tight">{result.stage}</div>
             </div>
             <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
               <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">CONFIANZA</div>
               <div className="text-sm font-bold text-gray-800">{result.stage_confidence}%</div>
-              <div className="w-full h-1 bg-gray-100 rounded-full mt-2 overflow-hidden">
-                <div className="h-full bg-blue-500 transition-all duration-1000" style={{ width: `${result.stage_confidence}%` }} />
-              </div>
             </div>
-            <div className="rounded-2xl p-4 shadow-sm border border-gray-100" style={{ background: sentimentConfig[result.sentiment]?.bg || 'white' }}>
+            <div className="rounded-2xl p-4 shadow-sm border" style={{ background: sentimentConfig[result.sentiment]?.bg, borderColor: `${sentimentConfig[result.sentiment]?.color}20` }}>
               <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">SENTIMIENTO</div>
-              <div className="text-sm font-bold" style={{ color: sentimentConfig[result.sentiment]?.color || '#1F2937' }}>
+              <div className="text-sm font-bold" style={{ color: sentimentConfig[result.sentiment]?.color }}>
                 {sentimentConfig[result.sentiment]?.label || result.sentiment}
               </div>
             </div>
             <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
               <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">URGENCIA</div>
-              <div className="flex items-center gap-1.5 mt-2">
-                {[1,2,3,4,5].map(i => (
-                  <div key={i} className="h-2 rounded-full flex-1"
-                    style={{ background: i <= result.urgency_level ? 'var(--ash-primary)' : '#F3F4F6' }} />
-                ))}
+              <div className="flex gap-1 mt-2">
+                {[1,2,3,4,5].map(i => <div key={i} className={`h-1.5 flex-1 rounded-full ${i <= result.urgency_level ? 'bg-blue-500' : 'bg-gray-100'}`} />)}
               </div>
             </div>
           </div>
 
           <div className="card-elegant rounded-2xl overflow-hidden bg-white">
-            <div className="flex border-b border-gray-100 overflow-x-auto scroller-hidden">
+            <div className="flex border-b border-gray-100">
               {result.responses?.map((r, i) => (
                 <button key={i} onClick={() => setActiveResponse(i)}
-                  className="flex-shrink-0 px-6 py-4 text-xs font-bold transition-all border-b-2"
-                  style={{
-                    backgroundColor: activeResponse === i ? '#F0F7FF' : 'transparent',
-                    color: activeResponse === i ? 'var(--ash-primary)' : '#9CA3AF',
-                    borderColor: activeResponse === i ? 'var(--ash-primary)' : 'transparent',
-                  }}>
-                  OPCIÓN #{i + 1} ({r.score}%)
+                  className={`px-6 py-4 text-xs font-bold transition-all border-b-2 ${activeResponse === i ? 'bg-blue-50 text-blue-600 border-blue-600' : 'text-gray-400 border-transparent'}`}>
+                  OPCIÓN #{i + 1}
                 </button>
               ))}
             </div>
-            {result.responses?.[activeResponse] && (
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-6">
-                  <div>
-                    <Tag color="mint">{result.responses[activeResponse].technique_tag}</Tag>
-                    <h3 className="text-lg font-bold mt-2 text-gray-900">
-                      {result.responses[activeResponse].technique}
-                    </h3>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-3xl font-black text-blue-600">
-                      {result.responses[activeResponse].score}
-                    </div>
-                    <div className="text-[10px] font-bold text-gray-400 uppercase">CALIDAD</div>
-                  </div>
-                </div>
-                
-                <div className="bg-blue-50/50 rounded-xl p-4 mb-6 border border-blue-100/50">
-                  <p className="text-sm leading-relaxed text-blue-800 italic">
-                    <span className="font-bold not-italic mr-2">Estrategia:</span>
-                    {result.responses[activeResponse].reasoning}
-                  </p>
-                </div>
-
-                <MsgBlock text={result.responses[activeResponse].message} color="blue" />
-              </div>
-            )}
-          </div>
-
-          {/* Next step */}
-          {result.next_step && (
-            <div className="rounded-2xl p-5 bg-emerald-50 border border-emerald-100">
-              <div className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1">PROTIP DE SEGUIMIENTO</div>
-              <p className="text-sm font-medium text-emerald-900">{result.next_step}</p>
+            <div className="p-6">
+              <Tag color="mint">{result.responses[activeResponse].technique_tag}</Tag>
+              <h3 className="text-lg font-bold mt-2 mb-4 text-gray-900">{result.responses[activeResponse].technique}</h3>
+              <p className="text-sm leading-relaxed text-blue-800 italic mb-6 bg-blue-50/50 p-4 rounded-xl">
+                {result.responses[activeResponse].reasoning}
+              </p>
+              <MsgBlock text={result.responses[activeResponse].message} color="blue" />
             </div>
-          )}
+          </div>
         </div>
       )}
     </div>
   );
 }
-
-// ─── SECTIONS ─────────────────────────────────────────────────────────────────
 
 function TechniquesSection() {
   return (
@@ -646,22 +645,11 @@ function TechniquesSection() {
               <Tag color="purple">{t.type}</Tag>
             </div>
             <p className="text-sm leading-relaxed text-gray-600">{t.desc}</p>
-            <div className="rounded-xl p-4 text-xs bg-gray-50 border border-gray-100 text-gray-700 font-medium leading-relaxed">
+            <div className="rounded-xl p-4 text-xs bg-gray-50 border border-gray-100 text-gray-700 font-medium whitespace-pre-wrap">
               <span className="text-blue-600 font-bold block mb-1">Estructura Sugerida: </span>{t.formula}
             </div>
-            {t.messages ? (
-              <div className="space-y-3">
-                {t.messages.map((m, i) => <MsgBlock key={i} text={m.text} color={m.color} />)}
-              </div>
-            ) : (
-              <MsgBlock text={t.message} />
-            )}
-            {t.note && (
-              <div className="flex items-center gap-2 p-3 bg-blue-50/30 rounded-lg border border-blue-100/30">
-                <span className="text-sm">💡</span>
-                <p className="text-xs font-medium text-blue-800">{t.note}</p>
-              </div>
-            )}
+            {t.messages ? t.messages.map((m, i) => <MsgBlock key={i} text={m.text} color={m.color} />) : <MsgBlock text={t.message} />}
+            {t.note && <p className="text-xs font-medium text-blue-800 bg-blue-50/30 p-3 rounded-lg border border-blue-100/30 italic">💡 {t.note}</p>}
           </div>
         </Collapsible>
       ))}
@@ -674,16 +662,9 @@ function FlowSection() {
     <div className="space-y-4">
       {FLOW_STEPS.map(s => (
         <Collapsible key={s.n} icon={`${s.n}`} title={`Paso ${s.n}: ${s.title}`} badge={s.tag} badgeColor={s.color}>
-          <div className="space-y-4">
-            <Tag color="purple">{s.tech}</Tag>
-            <MsgBlock text={s.message} color={s.color} />
-            {s.note && (
-              <div className="flex items-center gap-2 p-3 bg-blue-50/30 rounded-lg border border-blue-100/30">
-                <span className="text-sm">💡</span>
-                <p className="text-xs font-medium text-blue-800">{s.note}</p>
-              </div>
-            )}
-          </div>
+          <Tag color="purple">{s.tech}</Tag>
+          <MsgBlock text={s.message} color={s.color} />
+          {s.note && <p className="text-xs font-medium text-blue-800 bg-blue-50/30 p-3 rounded-lg border border-blue-100/30 italic">💡 {s.note}</p>}
         </Collapsible>
       ))}
     </div>
@@ -694,7 +675,7 @@ function ObjectionsSection() {
   return (
     <div className="space-y-4">
       {OBJECTIONS.map((o, i) => (
-        <Collapsible key={i} icon="⚡" title={o.q} badge={o.tech} badgeColor="amber">
+        <Collapsible key={i} icon="💬" title={o.q} badge={o.tech} badgeColor="amber">
           <MsgBlock text={o.a} color="amber" />
         </Collapsible>
       ))}
@@ -707,16 +688,9 @@ function ReactivationSection() {
     <div className="space-y-4">
       {REACTIVATION.map(r => (
         <Collapsible key={r.n} icon={`${r.n}`} title={`Paso ${r.n}: ${r.title}`} badge={`Espera: ${r.when}`} badgeColor="amber">
-          <div className="space-y-4">
-            <Tag color="purple">{r.tech}</Tag>
-            <MsgBlock text={r.message} color="mint" />
-            {r.note && (
-              <div className="flex items-center gap-2 p-3 bg-blue-50/30 rounded-lg border border-blue-100/30">
-                <span className="text-sm">💡</span>
-                <p className="text-xs font-medium text-blue-800">{r.note}</p>
-              </div>
-            )}
-          </div>
+          <Tag color="purple">{r.tech}</Tag>
+          <MsgBlock text={r.message} color="mint" />
+          {r.note && <p className="text-xs font-medium text-blue-800 bg-blue-50/30 p-3 rounded-lg border border-blue-100/30 italic">💡 {r.note}</p>}
         </Collapsible>
       ))}
     </div>
@@ -727,7 +701,7 @@ function RulesSection() {
   return (
     <div className="space-y-3">
       {RULES.map((r, i) => (
-        <div key={i} className="card-elegant flex gap-4 p-5 rounded-2xl bg-white">
+        <div key={i} className="card-elegant flex gap-4 p-5 rounded-2xl bg-white transition-all hover:translate-y-[-2px]">
           <span className="text-2xl w-12 h-12 flex items-center justify-center rounded-xl bg-gray-50 flex-shrink-0">{r.icon}</span>
           <div>
             <p className="text-sm font-bold mb-1 text-gray-900" style={{ fontFamily: 'var(--font-display)' }}>{r.text}</p>
@@ -747,7 +721,7 @@ function TrackingSection() {
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {TRACKING_METRICS.map((m, i) => (
             <div key={i} className="card-elegant rounded-2xl p-5 text-center bg-white">
-              <div className="text-2xl font-black mb-1 text-blue-600" style={{ fontFamily: 'var(--font-mono)' }}>{m.val}</div>
+              <div className="text-2xl font-black mb-1 text-blue-600" style={{ fontFamily: 'var(--font-display)' }}>{m.val}</div>
               <div className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">{m.label}</div>
             </div>
           ))}
@@ -760,10 +734,8 @@ function TrackingSection() {
             <div key={i} className="card-elegant flex gap-4 p-4 rounded-2xl bg-white">
               <span className="text-lg w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 flex-shrink-0">{l.dot}</span>
               <div>
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-sm font-bold" style={{ color: l.color }}>{l.label}</span>
-                </div>
-                <span className="text-xs font-medium text-gray-500">{l.desc}</span>
+                <span className="text-sm font-bold" style={{ color: l.color }}>{l.label}</span>
+                <p className="text-xs font-medium text-gray-500">{l.desc}</p>
               </div>
             </div>
           ))}
@@ -773,11 +745,9 @@ function TrackingSection() {
         <p className="section-title mb-4">Secuencia de Seguimiento (Trial)</p>
         <div className="space-y-3">
           {CHECKINS.map((c, i) => (
-            <div key={i} className="card-elegant flex gap-4 p-5 rounded-2xl bg-white">
-              <div className="flex-shrink-0 pt-0.5">
-                <span className="text-[11px] font-black px-2 py-1 rounded bg-blue-100 text-blue-700" style={{ fontFamily: 'var(--font-mono)' }}>{c.day}</span>
-              </div>
-              <p className="text-sm leading-relaxed text-gray-600 font-medium">{c.msg}</p>
+            <div key={i} className="card-elegant flex gap-4 p-5 rounded-2xl bg-white border-l-4 border-blue-500">
+              <span className="text-[11px] font-black px-2 py-1 rounded bg-blue-100 text-blue-700 h-fit" style={{ fontFamily: 'var(--font-display)' }}>{c.day}</span>
+              <p className="text-sm leading-relaxed text-gray-600 font-medium italic">{c.msg}</p>
             </div>
           ))}
         </div>
@@ -786,15 +756,51 @@ function TrackingSection() {
   );
 }
 
-// ─── MAIN APP ─────────────────────────────────────────────────────────────────
+function ShortFlowSection() {
+  return (
+    <div className="space-y-4">
+      <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100 mb-6 font-medium text-xs text-blue-800 italic">
+        🎯 Esta flujo está optimizado para leads calientes que buscan resultados hoy.
+      </div>
+      {SHORT_FLOW.map(s => (
+        <Collapsible key={s.n} icon={`${s.n}`} title={`Paso ${s.n}: ${s.title}`} badge={s.tag} badgeColor={s.color}>
+          <Tag color="purple">{s.tech}</Tag>
+          <MsgBlock text={s.message} color={s.color} />
+          {s.note && <p className="text-xs font-medium text-blue-800 bg-blue-50/30 p-3 rounded-lg border border-blue-100/30 italic">💡 {s.note}</p>}
+        </Collapsible>
+      ))}
+    </div>
+  );
+}
+
+function MixedFlowSection() {
+  return (
+    <div className="space-y-4">
+      <div className="bg-amber-50 p-4 rounded-2xl border border-amber-100 mb-6 font-medium text-xs text-amber-800 italic">
+        🔄 Flujo mixto para leads interesados pero con fricción o dudas específicas.
+      </div>
+      {MIXED_FLOW.map(s => (
+        <Collapsible key={s.n} icon={`${s.n}`} title={`Paso ${s.n}: ${s.title}`} badge={s.tag} badgeColor={s.color}>
+          <Tag color="purple">{s.tech}</Tag>
+          <MsgBlock text={s.message} color={s.color} />
+          {s.note && <p className="text-xs font-medium text-blue-800 bg-blue-50/30 p-3 rounded-lg border border-blue-100/30 italic">💡 {s.note}</p>}
+        </Collapsible>
+      ))}
+    </div>
+  );
+}
+
+// --- MAIN APP ---
 
 const NAV = [
-  { id: 'ia', label: 'IA Analyzer', icon: '✦' },
+  { id: 'ia', label: 'IA Analyzer', icon: '📊' },
   { id: 'flujo', label: 'Flujo completo', icon: '→' },
+  { id: 'corto', label: 'Flujo corto', icon: '⚡' },
+  { id: 'mixto', label: 'Flujo mixto', icon: '⇄' },
   { id: 'tecnicas', label: 'Técnicas', icon: '◎' },
-  { id: 'objeciones', label: 'Objeciones', icon: '⚡' },
+  { id: 'objeciones', label: 'Objeciones', icon: '💬' },
   { id: 'reactivacion', label: 'Reactivación', icon: '↺' },
-  { id: 'reglas', label: 'Reglas de oro', icon: '★' },
+  { id: 'reglas', label: 'Reglas de oro', icon: '⭐' },
   { id: 'seguimiento', label: 'Seguimiento', icon: '◈' },
 ];
 
@@ -804,8 +810,10 @@ export default function App() {
 
   const SECTION_COMPONENTS = {
     ia: <AIAnalyzer />,
-    tecnicas: <TechniquesSection />,
     flujo: <FlowSection />,
+    corto: <ShortFlowSection />,
+    mixto: <MixedFlowSection />,
+    tecnicas: <TechniquesSection />,
     objeciones: <ObjectionsSection />,
     reactivacion: <ReactivationSection />,
     reglas: <RulesSection />,
@@ -815,82 +823,59 @@ export default function App() {
   const currentNav = NAV.find(n => n.id === active);
 
   return (
-    <div className="grid-bg min-h-screen flex bg-[#F9FAFB]">
-      {/* Sidebar Desktop */}
-      <aside className="hidden md:flex flex-col w-64 flex-shrink-0 bg-white border-r border-gray-200 sticky top-0 h-screen">
-        {/* Logo */}
+    <div className="grid-bg min-h-screen flex bg-[#F9FAFB] font-sans">
+      <aside className={`fixed md:sticky top-0 left-0 h-screen w-64 bg-white border-r border-gray-200 flex flex-col transition-transform duration-300 z-50 ${menuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         <div className="p-8 pb-6 border-b border-gray-50">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg font-black shadow-lg shadow-blue-100"
-              style={{ background: 'var(--ash-primary)', color: 'white' }}>A</div>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg bg-[#4A7DE8]">A</div>
             <div>
-              <div className="font-black text-sm tracking-tight text-gray-900" style={{ fontFamily: 'var(--font-display)' }}>ASHIRA</div>
-              <div className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Intelligence</div>
+              <div className="font-black text-sm tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>ASHIRA</div>
+              <div className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">Intelligence</div>
             </div>
           </div>
         </div>
-        {/* Nav */}
-        <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
+
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto no-scrollbar">
           {NAV.map(item => (
-            <button key={item.id} onClick={() => setActive(item.id)}
-              className={`nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm transition-all duration-200 ${active === item.id ? 'active shadow-sm shadow-blue-50' : 'text-gray-500 hover:bg-gray-50'}`}
-              style={{ fontFamily: 'var(--font-body)' }}>
-              <span className="text-base">{item.icon}</span>
-              <span className="font-bold">{item.label}</span>
+            <button key={item.id} onClick={() => { setActive(item.id); setMenuOpen(false); }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-xs font-bold transition-all ${active === item.id ? 'bg-blue-50 text-blue-600' : 'text-gray-500 hover:bg-gray-50'}`}>
+              <span className="text-sm">{item.icon}</span>
+              {item.label}
             </button>
           ))}
         </nav>
-        {/* Footer */}
-        <div className="p-6 border-t border-gray-50">
-          <div className="flex items-center gap-2 mb-2 bg-blue-50 p-2 rounded-lg border border-blue-100">
-            <div className="spinner" style={{ width: 12, height: 12, borderWidth: 1 }} />
-            <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider">IA Engine Active</span>
+
+        <div className="p-4 border-t border-gray-50 bg-white">
+          <CostTracker />
+          <div className="mt-4 p-3 bg-gray-50 rounded-xl flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">IA Engine Active</span>
           </div>
-          <p className="text-[10px] font-medium text-gray-400 mt-2 text-center">
-            ASHIRA Playbook © 2026
-          </p>
         </div>
       </aside>
 
-      {/* Main */}
+      {menuOpen && <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden" onClick={() => setMenuOpen(false)} />}
+
       <main className="flex-1 flex flex-col min-w-0">
-        {/* Header */}
         <header className="sticky top-0 z-40 flex items-center justify-between px-8 py-5 bg-white/70 border-b border-gray-100 backdrop-blur-xl">
           <div className="flex items-center gap-4">
-            {/* Mobile menu button */}
             <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden p-2 rounded-xl bg-gray-50 text-blue-600">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
             </button>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xl">{currentNav?.icon}</span>
-                <h1 className="text-lg font-black tracking-tight text-gray-900" style={{ fontFamily: 'var(--font-display)' }}>
-                  {currentNav?.label}
-                </h1>
+                <h1 className="text-lg font-black tracking-tight text-gray-900" style={{ fontFamily: 'var(--font-display)' }}>{currentNav?.label}</h1>
               </div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">ASHIRA Sales Playbook</p>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">ASHIRA Sales Playbook</p>
             </div>
           </div>
           <a href="https://ashira.click/register" target="_blank" rel="noopener noreferrer"
-            className="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all bg-white border border-gray-200 text-gray-700 shadow-sm hover:shadow-md hover:border-blue-200 hover:text-blue-600">
+             className="hidden sm:inline-block px-5 py-2.5 rounded-xl text-xs font-bold bg-white border border-gray-200 text-gray-700 shadow-sm hover:shadow-md transition-all">
             Acceso Directo ↗
           </a>
         </header>
 
-        {/* Mobile menu */}
-        {menuOpen && (
-          <div className="md:hidden p-4 space-y-2 bg-white border-b border-gray-100 shadow-xl animate-in slide-in-from-top duration-300">
-            {NAV.map(item => (
-              <button key={item.id} onClick={() => { setActive(item.id); setMenuOpen(false); }}
-                className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-left text-sm font-bold ${active === item.id ? 'bg-blue-50 text-blue-700' : 'text-gray-500'}`}>
-                <span>{item.icon}</span>
-                {item.label}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Content */}
         <div className="flex-1 p-8 max-w-4xl mx-auto w-full">
           <div key={active} className="fade-in">
             {SECTION_COMPONENTS[active]}
