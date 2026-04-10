@@ -780,7 +780,7 @@ function MarketingSection() {
                 </div>
                 <p className="text-sm font-bold mb-2">Objetivo: GENERAR CONFIANZA</p>
                 <p className="text-xs text-gray-500 leading-relaxed mb-3">Testimonios, casos de uso (SafeCare) y dashboards antes vs después.</p>
-                <p className="text-[10px] font-black italic text-gray-400">Regla: Datos específicos > Argumentos abstractos.</p>
+                <p className="text-[10px] font-black italic text-gray-400">Regla: Datos específicos &gt; Argumentos abstractos.</p>
               </div>
               <div className="card-elegant p-5 rounded-2xl bg-white border-l-4 border-teal-400">
                 <div className="flex justify-between items-start mb-3">
@@ -1392,7 +1392,12 @@ function MixedFlowSection() {
 
 // --- MAIN APP ---
 
+const NAV = [
+  { id: 'ia', label: 'IA Analyzer', icon: '📊' },
   { id: 'marketing', label: 'Estrategias Marketing', icon: '🎯' },
+  { id: 'flujo', label: 'Flujo completo', icon: '→' },
+  { id: 'corto', label: 'Flujo corto', icon: '⚡' },
+  { id: 'mixto', label: 'Flujo mixto', icon: '⇄' },
   { id: 'tecnicas', label: 'Técnicas', icon: '◎' },
   { id: 'objeciones', label: 'Objeciones', icon: '💬' },
   { id: 'reactivacion', label: 'Reactivación', icon: '↺' },
