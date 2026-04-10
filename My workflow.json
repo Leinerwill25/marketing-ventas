@@ -1,0 +1,461 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * 1,3,5"
+            }
+          ]
+        }
+      },
+      "id": "e73c7178-34d4-4e19-91ff-cb12d0926960",
+      "name": "Lun/Mié/Vie 8am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -448,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.sondalabs.app/v1/auth/login/",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "email",
+              "value": "=REDACTED_EMAIL"
+            },
+            {
+              "name": "password",
+              "value": "=REDACTED_PASSWORD"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "15389c2a-b3b5-4675-90aa-0b7e62d03746",
+      "name": "1. Login Sonda → JWT",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -224,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.sondalabs.app/v1/competitors/groups/fe0d6b5a-870e-4d36-a3f2-79bc69e6d208/metrics/?days=30",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('1. Login Sonda → JWT').item.json.access }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "07cc6067-98e9-4a07-891b-6522586e2eed",
+      "name": "2. GET Metrics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.sondalabs.app/v1/competitors/groups/fe0d6b5a-870e-4d36-a3f2-79bc69e6d208/posts/?page=1&sort=engagement&days=30",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('1. Login Sonda → JWT').item.json.access }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "01741c1e-ba68-4fa5-b457-4ba7c49344d1",
+      "name": "3. GET Posts Top Engagement",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.sondalabs.app/v1/competitors/groups/fe0d6b5a-870e-4d36-a3f2-79bc69e6d208/hashtags/?days=30",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('1. Login Sonda → JWT').item.json.access }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "93ccb02f-9ae1-4d33-aa4a-98f8ffdfb249",
+      "name": "4. GET Hashtags",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.sondalabs.app/v1/competitors/groups/fe0d6b5a-870e-4d36-a3f2-79bc69e6d208/accounts/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('1. Login Sonda → JWT').item.json.access }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "1384275d-c4a3-42a0-a165-27e291149a8d",
+      "name": "5. GET Accounts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Code Node - Fixed Version\n// Este código procesa los datos de Sonda y prepara el payload para Supabase\n\ntry {\n  // Función para obtener datos de nodos de forma segura\n  const getJson = (nodeName) => {\n    try {\n      // Intentamos obtener el primer item del nodo\n      return $(nodeName).first().json;\n    } catch (e) {\n      console.warn(`Nodo \"${nodeName}\" no encontrado o sin datos. Usando objeto vacío.`);\n      return {};\n    }\n  };\n\n  // 1. Obtención de datos con nombres exactos de nodos\n  const metricsData = getJson('2. GET Metrics');\n  const postsRaw = getJson('3. GET Posts Top Engagement');\n  const hashtagsRaw = getJson('4. GET Hashtags');\n  const accountsRaw = getJson('5. GET Accounts');\n\n  // 2. Procesamiento de Posts (Top 5)\n  // Manejamos si los datos vienen en una propiedad 'results' o directamente en la raíz\n  const postsArr = Array.isArray(postsRaw?.results) ? postsRaw.results : (Array.isArray(postsRaw) ? postsRaw : []);\n  \n  const topPosts = postsArr.slice(0, 5).map(p => ({\n    account: p.account_username || p.username || 'unknown',\n    caption: (p.caption || '').substring(0, 200),\n    likes: p.like_count || p.likes || 0,\n    comments: p.comment_count || p.comments || 0,\n    views: p.video_view_count || p.views || 0,\n    engagement_rate: p.engagement_rate || 0,\n    date: p.timestamp || p.date || ''\n  }));\n\n  // 3. Procesamiento de Cuentas\n  const accountsArr = Array.isArray(accountsRaw?.results) ? accountsRaw.results : (Array.isArray(accountsRaw) ? accountsRaw : []);\n  \n  const accountData = accountsArr.map(a => ({\n    username: a.username || a.account_username,\n    followers: a.follower_count || a.followers || 0,\n    following: a.following_count || a.following || 0,\n    posts: a.media_count || a.posts || 0\n  }));\n\n  // 4. Procesamiento de Hashtags (Top 20)\n  const hashtagsArr = Array.isArray(hashtagsRaw?.results) ? hashtagsRaw.results : (Array.isArray(hashtagsRaw) ? hashtagsRaw : []);\n  \n  const hashtagData = hashtagsArr.slice(0, 20).map(h => ({\n    tag: h.hashtag || h.name || h,\n    count: h.count || h.usage_count || 1\n  }));\n\n  // 5. Datos Específicos de ASHIRA\n  const ashiraAccount = accountData.find(a => a.username?.toLowerCase().includes('ashira'));\n  const ashiraFollowers = ashiraAccount?.followers || 242;\n\n  // 6. Construcción del Payload para Supabase\n  const snapshotDate = new Date().toISOString().split('T')[0];\n  \n  const snapshot = {\n    snapshot_date: snapshotDate,\n    days_range: 30,\n    accounts: JSON.stringify(accountData),\n    metrics: JSON.stringify(metricsData),\n    posts: JSON.stringify(topPosts),\n    hashtags: JSON.stringify(hashtagData),\n    related: JSON.stringify([]),\n    api_status: JSON.stringify({\n      metrics_status: 200,\n      posts_status: 200,\n      hashtags_status: 200,\n      fetched_at: new Date().toISOString()\n    })\n  };\n\n  // 7. Retorno para n8n\n  return [{\n    json: {\n      snapshot,\n      analysis_input: {\n        accounts: accountData,\n        top_posts: topPosts,\n        hashtags: hashtagData,\n        ashira_followers: ashiraFollowers,\n        date: snapshotDate\n      }\n    }\n  }];\n\n} catch (error) {\n  // Si algo falla, devolvemos el error amigablemente\n  return [{\n    json: {\n      error: error.message,\n      stack: error.stack,\n      status: 'failed'\n    }\n  }];\n}"
+      },
+      "id": "b5ff7e46-5d42-4d12-ae4e-1a3c75bceb1d",
+      "name": "6. Merge & Clean Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "tableId": "sonda_snapshots"
+      },
+      "id": "dfc591e4-acf3-4ae9-8303-a0668d3e9d00",
+      "name": "7. Save Snapshot → Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        448,
+        192
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "MkwIJkTCpnnlyv1u",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "ashira_kpis",
+        "limit": 1
+      },
+      "id": "5d0f5a50-b36e-4a7a-872d-e369f4c9116e",
+      "name": "8. Get Previous Analysis",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        448,
+        384
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "MkwIJkTCpnnlyv1u",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Code Node - Build AI Prompt (Version Robusta - Nombres en Ingles)\n\nconst NODE_NAMES = {\n  MERGE: '6. Merge & Clean Data',\n  SAVE: '7. Save Snapshot → Supabase',\n  HISTORY: '8. Get Previous Analysis' // Volvemos a ingles\n};\n\ntry {\n  // 1. Obtencion segura de datos (evita el error de \"Node hasn't been executed\")\n  const getSafeItem = (name) => {\n    try {\n      return $(name).item.json;\n    } catch (e) {\n      return null;\n    }\n  };\n\n  const mergedData = getSafeItem(NODE_NAMES.MERGE);\n  const snapshotResult = getSafeItem(NODE_NAMES.SAVE);\n  \n  // Para el historial usamos .all() que es mas seguro si hay 0 resultados\n  let prevAnalysis = null;\n  try {\n    const historyItems = $(NODE_NAMES.HISTORY).all();\n    if (historyItems && historyItems.length > 0) {\n      prevAnalysis = historyItems[0].json;\n    }\n  } catch (e) {\n    // Si el nodo no se ha ejecutado aun, simplemente devolvemos null y seguimos\n    console.log(\"Historial no disponible.\");\n  }\n\n  // 2. Validacion de datos\n  if (!mergedData || !mergedData.analysis_input) {\n    throw new Error(\"No se encontraron datos en el nodo 6. Asegurate de que el flujo llegue hasta aqui.\");\n  }\n\n  const snapshotId = snapshotResult?.id || null;\n  const newData = mergedData.analysis_input;\n\n  // 3. Construccion del prompt\n  const promptInput = {\n    fecha: newData.date,\n    ashira_seguidores: newData.ashira_followers,\n    competidores: (newData.accounts || []).map(a => ({\n      cuenta: a.username,\n      seguidores: a.followers\n    })),\n    top_posts: (newData.top_posts || []).slice(0, 5).map(p => ({\n      cuenta: p.account,\n      likes: p.likes,\n      comentarios: p.comments,\n      vistas: p.views,\n      caption_preview: (p.caption || '').substring(0, 100)\n    })),\n    hashtags_trending: (newData.hashtags || []).slice(0, 10).map(h => h.tag || h),\n    analisis_anterior: prevAnalysis ? {\n      fecha: prevAnalysis.analysis_date,\n      tendencia: prevAnalysis.trend,\n      estrategias_activas: (\n        (safeParse(prevAnalysis.strategy_recepcionista)).length +\n        (safeParse(prevAnalysis.strategy_medico_independiente)).length\n      )\n    } : null\n  };\n\n  return [{ json: { promptInput, snapshotId, hasHistory: !!prevAnalysis } }];\n\n} catch (error) {\n  return [{\n    json: {\n      error: error.message,\n      status: 'failed'\n    }\n  }];\n}\n\nfunction safeParse(val) {\n  if (!val) return [];\n  if (Array.isArray(val)) return val;\n  try { return JSON.parse(val); } catch (e) { return []; }\n}\n"
+      },
+      "id": "a96ff6b1-fe05-4ad3-b991-e49dd2b9d00e",
+      "name": "9. Build AI Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "=PEGAR_AQUI_TU_API_KEY"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\nJSON.stringify({\n  \"model\": \"claude-haiku-4-5\",\n  \"max_tokens\": 1800,\n  \"system\": \"Eres un analista de marketing para ASHIRA, SaaS médico venezolano (242 seguidores en @ashira_soft). Tu trabajo es analizar datos de Instagram de 4 competidores y generar estrategias de marketing NUEVAS, CONCRETAS y SEGMENTADAS.\\n\\nCOMPETIDORES: @docsiapp (12.8K), @hipocrates.salud (4.9K), @docguia.inc (4.5K), @ashira_soft (242).\\n\\nSEGMENTOS OBJETIVO: recepcionista, medico_independiente, director_clinica, paciente, especialista.\\n\\nREGLAS ABSOLUTAS:\\n1. SOLO estrategias NUEVAS vs el análisis anterior. Si ya existe una estrategia similar, NO la repitas.\\n2. Máximo 3 recomendaciones por segmento. Cada una: acción concreta en 1-2 oraciones + métrica esperada.\\n3. NUNCA uses frases genéricas como 'considera', 'podrías', 'tal vez', 'es importante'.\\n4. Usa datos específicos del input: números reales, nombres de cuentas, hashtags del sector.\\n5. Si no hay análisis anterior, crea estrategias base para los 5 segmentos.\\n6. Determina la tendencia: 'mejorando' si ASHIRA creció vs antes, 'estancado' si igual, 'retrocediendo' si perdió.\\n\\nRESPONDE SOLO EN JSON VÁLIDO con esta estructura exacta:\\n{\\n  \\\"trend\\\": \\\"mejorando|estancado|retrocediendo\\\",\\n  \\\"competitive_summary\\\": {\\n    \\\"insight_principal\\\": \\\"string (máx 100 chars)\\\",\\n    \\\"oportunidad_detectada\\\": \\\"string (máx 100 chars)\\\",\\n    \\\"amenaza_principal\\\": \\\"string (máx 100 chars)\\\"\\n  },\\n  \\\"strategy_recepcionista\\\": [{\\\"accion\\\": \\\"\\\", \\\"metrica\\\": \\\"\\\", \\\"formato\\\": \\\"\\\"}],\\n  \\\"strategy_medico_independiente\\\": [{\\\"accion\\\": \\\"\\\", \\\"metrica\\\": \\\"\\\", \\\"formato\\\": \\\"\\\"}],\\n  \\\"strategy_director_clinica\\\": [{\\\"accion\\\": \\\"\\\", \\\"metrica\\\": \\\"\\\", \\\"formato\\\": \\\"\\\"}],\\n  \\\"strategy_paciente\\\": [{\\\"accion\\\": \\\"\\\", \\\"metrica\\\": \\\"\\\", \\\"formato\\\": \\\"\\\"}],\\n  \\\"strategy_especialista\\\": [{\\\"accion\\\": \\\"\\\", \\\"metrica\\\": \\\"\\\", \\\"formato\\\": \\\"\\\"}],\\n  \\\"content_insights\\\": {\\n    \\\"mejor_post_competencia\\\": {\\\"cuenta\\\": \\\"\\\", \\\"por_que_funciono\\\": \\\"\\\", \\\"adaptar_para_ashira\\\": \\\"\\\"},\\n    \\\"hashtags_recomendados\\\": [],\\n    \\\"formato_mas_efectivo\\\": \\\"\\\"\\n  },\\n  \\\"changes_vs_previous\\\": [],\\n  \\\"content_recommendations\\\": [{\\\"titulo\\\": \\\"\\\", \\\"formato\\\": \\\"\\\", \\\"segmento\\\": \\\"\\\", \\\"caption_ejemplo\\\": \\\"\\\"}]\\n}\",\n  \"messages\": [{\n    \"role\": \"user\",\n    \"content\": \"Analiza estos datos de Sonda Labs y genera el JSON de estrategias:\\n\\n\" + JSON.stringify($json.promptInput)\n  }]\n})\n}}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "702c8d5b-8d00-4add-a522-e223b9166a9f",
+      "name": "10. Claude Haiku Analysis",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse Claude's response and prepare for Supabase insert\nconst claudeResponse = $('10. Claude Haiku Analysis').item.json;\nconst promptData = $('9. Build AI Prompt').item.json;\n\n// Extract text from Anthropic response\nlet analysisText = '';\nif (claudeResponse?.content?.[0]?.text) {\n  analysisText = claudeResponse.content[0].text.trim();\n} else if (claudeResponse?.content) {\n  analysisText = JSON.stringify(claudeResponse.content);\n}\n\n// Clean and parse JSON\nconst cleanJson = analysisText\n  .replace(/^```json\\s*/i, '')\n  .replace(/^```\\s*/i, '')\n  .replace(/\\s*```$/i, '')\n  .trim();\n\nlet analysis;\ntry {\n  analysis = JSON.parse(cleanJson);\n} catch(e) {\n  // Fallback if parsing fails\n  analysis = {\n    trend: 'estancado',\n    competitive_summary: { insight_principal: 'Error parsing AI response', oportunidad_detectada: '', amenaza_principal: '' },\n    strategy_recepcionista: [],\n    strategy_medico_independiente: [],\n    strategy_director_clinica: [],\n    strategy_paciente: [],\n    strategy_especialista: [],\n    content_insights: {},\n    changes_vs_previous: [],\n    content_recommendations: []\n  };\n}\n\n// Calculate token usage and cost\nconst inputTokens = claudeResponse?.usage?.input_tokens || 0;\nconst outputTokens = claudeResponse?.usage?.output_tokens || 0;\nconst costUsd = (inputTokens / 1000000 * 1) + (outputTokens / 1000000 * 5); // Haiku pricing\n\nconst dbRecord = {\n  analysis_date: new Date().toISOString().split('T')[0],\n  snapshot_id: promptData.snapshotId,\n  competitive_summary: JSON.stringify(analysis.competitive_summary || {}),\n  strategy_recepcionista: JSON.stringify(analysis.strategy_recepcionista || []),\n  strategy_medico_independiente: JSON.stringify(analysis.strategy_medico_independiente || []),\n  strategy_director_clinica: JSON.stringify(analysis.strategy_director_clinica || []),\n  strategy_paciente: JSON.stringify(analysis.strategy_paciente || []),\n  strategy_especialista: JSON.stringify(analysis.strategy_especialista || []),\n  content_recommendations: JSON.stringify(analysis.content_recommendations || []),\n  content_insights: JSON.stringify(analysis.content_insights || {}),\n  hashtag_strategy: JSON.stringify(analysis.content_insights?.hashtags_recomendados || []),\n  changes_vs_previous: JSON.stringify(analysis.changes_vs_previous || []),\n  trend: analysis.trend || 'estancado',\n  tokens_used: inputTokens + outputTokens,\n  analysis_cost_usd: parseFloat(costUsd.toFixed(6)),\n  model_version: 'claude-haiku-4-5'\n};\n\nreturn [{ json: dbRecord }];"
+      },
+      "id": "b8f358b7-f30c-4e12-bc55-a67e17d7d637",
+      "name": "11. Parse & Prepare DB Record",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "tableId": "marketing_analysis",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "analysis_date",
+              "fieldValue": "={{ $json.analysis_date }}"
+            }
+          ]
+        }
+      },
+      "id": "7329ab18-88a7-4c87-a4eb-815d8add6e09",
+      "name": "12. Save Analysis → Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        256
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "MkwIJkTCpnnlyv1u",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Lun/Mié/Vie 8am": {
+      "main": [
+        [
+          {
+            "node": "1. Login Sonda → JWT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "1. Login Sonda → JWT": {
+      "main": [
+        [
+          {
+            "node": "2. GET Metrics",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "3. GET Posts Top Engagement",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "4. GET Hashtags",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "5. GET Accounts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2. GET Metrics": {
+      "main": [
+        [
+          {
+            "node": "6. Merge & Clean Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "6. Merge & Clean Data": {
+      "main": [
+        [
+          {
+            "node": "7. Save Snapshot → Supabase",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "8. Get Previous Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "7. Save Snapshot → Supabase": {
+      "main": [
+        [
+          {
+            "node": "9. Build AI Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "9. Build AI Prompt": {
+      "main": [
+        [
+          {
+            "node": "10. Claude Haiku Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "10. Claude Haiku Analysis": {
+      "main": [
+        [
+          {
+            "node": "11. Parse & Prepare DB Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "11. Parse & Prepare DB Record": {
+      "main": [
+        [
+          {
+            "node": "12. Save Analysis → Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "fea2609a-53a2-48c1-bf34-a11c1d6e9b46",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "48fd7d7bb597d0a3b58f27a4b89a7e6f9c60e79266ce7e89a636f99e26d91614"
+  },
+  "id": "hsoYthRy1NnAfVd4",
+  "tags": []
+}

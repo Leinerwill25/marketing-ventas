@@ -1,0 +1,51 @@
+// n8n Code Node - Build AI Prompt (OPTIMIZED FOR TOKENS)
+
+const dbData = $('6. Merge & Clean Data').item.json;
+const snapshotResult = $('7. Save Snapshot → Supabase').item.json;
+let prevAnalysis = null;
+
+try {
+  const history = $('8. Get Previous Analysis').all();
+  if (history && history.length > 0) prevAnalysis = history[0].json;
+} catch (e) {}
+
+const accounts = JSON.parse(dbData.accounts || '[]');
+const ashira = accounts.find(a => a.username?.toLowerCase().includes('ashira'));
+
+const input = {
+  date: dbData.snapshot_date,
+  ashira_followers: ashira?.followers || 242,
+  accounts: accounts,
+  top_posts: JSON.parse(dbData.posts || '[]'),
+  hashtags: JSON.parse(dbData.hashtags || '[]')
+};
+
+if (prevAnalysis) {
+  input.analisis_anterior = {
+    fecha: prevAnalysis.analysis_date,
+    tendencia: prevAnalysis.trend
+  };
+}
+
+// System Prompt mas conciso para evitar truncamiento
+const sys = `Eres un estratega de marketing para ASHIRA (@ashira_soft, 242 seg). Analiza la competencia (@docsiapp, @hipocrates.salud, @docguia.inc) y genera estrategias en JSON.
+SEGMENTOS: recepcionista, medico_independiente, director_clinica, paciente, especialista.
+REGLAS:
+1. Solo estrategias NUEVAS vs analisis previo.
+2. Max 2 recomendaciones por segmento. Formato: accion + metrica + formato.
+3. Determina tendencia: mejorando|estancado|retrocediendo.
+4. Responde SOLO JSON sin texto adicional:
+{
+  "trend": "",
+  "competitive_summary": {"insight_principal": "", "oportunidad_detectada": "", "amenaza_principal": ""},
+  "strategy_recepcionista": [{"accion": "", "metrica": "", "formato": ""}],
+  "strategy_medico_independiente": [{"accion": "", "metrica": "", "formato": ""}],
+  "strategy_director_clinica": [{"accion": "", "metrica": "", "formato": ""}],
+  "strategy_paciente": [{"accion": "", "metrica": "", "formato": ""}],
+  "strategy_especialista": [{"accion": "", "metrica": "", "formato": ""}],
+  "content_insights": {"mejor_post_competencia": {"cuenta": "", "por_que_funciono": "", "adaptar_para_ashira": ""}, "hashtags_recomendados": [], "formato_mas_efectivo": ""},
+  "changes_vs_previous": [],
+  "content_recommendations": [{"titulo": "", "formato": "", "segmento": "", "caption_ejemplo": ""}]
+}`;
+
+return [{ json: { systemPrompt: sys, promptInput: JSON.stringify(input), snapshotId: snapshotResult?.id } }];

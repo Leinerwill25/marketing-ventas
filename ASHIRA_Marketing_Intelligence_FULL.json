@@ -1,0 +1,239 @@
+{
+  "name": "ASHIRA — Sonda Intelligence 3x/semana (FULL V1.1)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 12 * * 1,3,5"
+            }
+          ]
+        }
+      },
+      "id": "node-trigger",
+      "name": "Lun/Mié/Vie 8am Venezuela",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [180, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.sondalabs.app/v1/auth/login/",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={ \"email\": \"REDACTED_EMAIL\", \"password\": \"REDACTED_PASSWORD\" }",
+        "options": { "response": { "response": { "responseFormat": "json" } } }
+      },
+      "id": "node-login",
+      "name": "Login Sonda",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.sondalabs.app/v1/competitors/groups/fe0d6b5a-870e-4d36-a3f2-79bc69e6d208/metrics/?days=30",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $('Login Sonda').item.json.access }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "options": { "response": { "response": { "responseFormat": "json" } } }
+      },
+      "id": "node-metrics",
+      "name": "GET Metrics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [620, 180]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.sondalabs.app/v1/competitors/groups/fe0d6b5a-870e-4d36-a3f2-79bc69e6d208/posts/?page=1&sort=engagement&days=30",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $('Login Sonda').item.json.access }}" }
+          ]
+        },
+        "options": { "response": { "response": { "responseFormat": "json" } } }
+      },
+      "id": "node-posts",
+      "name": "GET Posts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [620, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.sondalabs.app/v1/competitors/groups/fe0d6b5a-870e-4d36-a3f2-79bc69e6d208/hashtags/?days=30",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $('Login Sonda').item.json.access }}" }
+          ]
+        },
+        "options": { "response": { "response": { "responseFormat": "json" } } }
+      },
+      "id": "node-hashtags",
+      "name": "GET Hashtags",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [620, 420]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.sondalabs.app/v1/competitors/groups/fe0d6b5a-870e-4d36-a3f2-79bc69e6d208/accounts/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $('Login Sonda').item.json.access }}" }
+          ]
+        },
+        "options": { "response": { "response": { "responseFormat": "json" } } }
+      },
+      "id": "node-accounts",
+      "name": "GET Accounts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [620, 540]
+    },
+    {
+      "parameters": {
+        "jsCode": "const metrics = $('GET Metrics').first().json;\nconst postsRaw = $('GET Posts').first().json;\nconst hashtagsRaw = $('GET Hashtags').first().json;\nconst accountsRaw = $('GET Accounts').first().json;\n\nconst allPosts = postsRaw?.results || postsRaw?.posts || (Array.isArray(postsRaw) ? postsRaw : []);\nconst topPosts = allPosts.slice(0, 8).map(p => ({\n  account: p.account_username || p.username || 'unknown',\n  caption: String(p.caption || '').substring(0, 200),\n  likes: p.like_count || 0,\n  comments: p.comment_count || 0,\n  views: p.video_view_count || 0\n}));\n\nconst allAccounts = accountsRaw?.results || accountsRaw?.accounts || (Array.isArray(accountsRaw) ? accountsRaw : []);\nconst accountData = allAccounts.map(a => ({\n  username: a.username || '',\n  followers: a.follower_count || 0\n}));\n\nconst ashira = accountData.find(a => a.username.toLowerCase().includes('ashira'));\nconst today = new Date().toISOString().split('T')[0];\n\nreturn [{\n  json: {\n    snapshot: {\n      snapshot_date: today,\n      days_range: 30,\n      accounts: JSON.stringify(accountData),\n      metrics: JSON.stringify(metrics),\n      posts: JSON.stringify(topPosts),\n      hashtags: JSON.stringify(hashtagsRaw),\n      related: JSON.stringify([]),\n      api_status: JSON.stringify({ fetched_at: new Date().toISOString() })\n    },\n    analysisInput: {\n      date: today,\n      ashira_followers: ashira?.followers || 242,\n      accounts: accountData,\n      top_posts: topPosts,\n      hashtags: Array.isArray(hashtagsRaw?.results) ? hashtagsRaw.results.map(h => h.hashtag) : []\n    }\n  }\n}];"
+      },
+      "id": "node-merge",
+      "name": "Merge y Limpiar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [840, 360]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://lyxlnduyzhwwupxjackg.supabase.co/rest/v1/sonda_snapshots",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer PEGAR_AQUI_SUPABASE_KEY" },
+            { "name": "apikey", "value": "PEGAR_AQUI_SUPABASE_KEY" },
+            { "name": "Prefer", "value": "return=representation" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ $json.snapshot }}",
+        "options": {}
+      },
+      "id": "node-save-snapshot",
+      "name": "Guardar Snapshot",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1040, 260]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://lyxlnduyzhwwupxjackg.supabase.co/rest/v1/marketing_analysis?order=analysis_date.desc&limit=1",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer PEGAR_AQUI_SUPABASE_KEY" },
+            { "name": "apikey", "value": "PEGAR_AQUI_SUPABASE_KEY" }
+          ]
+        }
+      },
+      "id": "node-prev-analysis",
+      "name": "Análisis Anterior",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1040, 460]
+    },
+    {
+      "parameters": {
+        "jsCode": "const mergeData = $('Merge y Limpiar').first().json;\nconst snapshotArr = $('Guardar Snapshot').first().json;\nconst prevArr = $('Análisis Anterior').first().json;\n\nconst snapshotResult = Array.isArray(snapshotArr) ? snapshotArr[0] : snapshotArr;\nconst prev = Array.isArray(prevArr) ? prevArr[0] : null;\n\nconst input = { ...mergeData.analysisInput };\nif (prev) {\n  input.analisis_anterior = {\n    fecha: prev.analysis_date,\n    tendencia: prev.trend,\n    insight_previo: JSON.parse(prev.competitive_summary || '{}').insight_principal\n  };\n}\n\nconst sys = 'Eres analista de marketing para ASHIRA. Genera estrategias NUEVAS en JSON...';\nreturn [{ json: { systemPrompt: sys, promptInput: JSON.stringify(input), snapshotId: snapshotResult?.id } }];"
+      },
+      "id": "node-build-prompt",
+      "name": "Construir Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1260, 360]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "PEGAR_AQUI_TU_API_KEY" },
+            { "name": "anthropic-version", "value": "2023-06-01" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={ \"model\": \"claude-3-5-haiku-latest\", \"max_tokens\": 1800, \"system\": \"{{ $json.systemPrompt }}\", \"messages\": [{ \"role\": \"user\", \"content\": \"Analiza: {{ $json.promptInput }}\" }] }",
+        "options": {}
+      },
+      "id": "node-claude",
+      "name": "Claude Haiku",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1480, 360]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cr = $('Claude Haiku').item.json;\nconst pd = $('Construir Prompt').item.json;\n\nlet txt = '';\nif (cr?.content?.[0]?.text) txt = cr.content[0].text;\n\nconst first = txt.indexOf('{');\nconst last = txt.lastIndexOf('}');\nconst cleaned = (first !== -1 && last !== -1) ? txt.substring(first, last + 1) : '{}';\n\nlet a = {};\ntry { a = JSON.parse(cleaned); } catch(e) { a = { trend: 'estancado' }; }\n\nconst it = cr?.usage?.input_tokens || 0;\nconst ot = cr?.usage?.output_tokens || 0;\nconst cost = (it / 1000000 * 0.8) + (ot / 1000000 * 4);\n\nreturn [{ json: {\n  analysis_date: new Date().toISOString().split('T')[0],\n  snapshot_id: pd.snapshotId,\n  competitive_summary: JSON.stringify(a.competitive_summary || {}),\n  strategy_recepcionista: JSON.stringify(a.strategy_recepcionista || []),\n  strategy_medico_independiente: JSON.stringify(a.strategy_medico_independiente || []),\n  strategy_director_clinica: JSON.stringify(a.strategy_director_clinica || []),\n  strategy_paciente: JSON.stringify(a.strategy_paciente || []),\n  strategy_especialista: JSON.stringify(a.strategy_especialista || []),\n  content_recommendations: JSON.stringify(a.content_recommendations || []),\n  content_insights: JSON.stringify(a.content_insights || {}),\n  hashtag_strategy: JSON.stringify(a.content_insights?.hashtags_recomendados || []),\n  changes_vs_previous: JSON.stringify(a.changes_vs_previous || []),\n  trend: a.trend || 'estancado',\n  tokens_used: it + ot,\n  analysis_cost_usd: parseFloat(cost.toFixed(6)),\n  model_version: 'claude-3-5-haiku-latest'\n} }];"
+      },
+      "id": "node-parse",
+      "name": "Parsear Respuesta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1700, 360]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://lyxlnduyzhwwupxjackg.supabase.co/rest/v1/marketing_analysis",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer PEGAR_AQUI_SUPABASE_KEY" },
+            { "name": "apikey", "value": "PEGAR_AQUI_SUPABASE_KEY" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "jsonBody": "={{ $json }}"
+      },
+      "id": "node-save-analysis",
+      "name": "Guardar Análisis",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1920, 360]
+    }
+  ],
+  "connections": {
+    "Lun/Mié/Vie 8am Venezuela": { "main": [[{ "node": "Login Sonda", "type": "main", "index": 0 }]] },
+    "Login Sonda": { "main": [[ { "node": "GET Metrics", "type": "main", "index": 0 }, { "node": "GET Posts", "type": "main", "index": 0 }, { "node": "GET Hashtags", "type": "main", "index": 0 }, { "node": "GET Accounts", "type": "main", "index": 0 } ]] },
+    "GET Metrics": { "main": [[{ "node": "Merge y Limpiar", "type": "main", "index": 0 }]] },
+    "GET Posts": { "main": [[{ "node": "Merge y Limpiar", "type": "main", "index": 0 }]] },
+    "GET Hashtags": { "main": [[{ "node": "Merge y Limpiar", "type": "main", "index": 0 }]] },
+    "GET Accounts": { "main": [[{ "node": "Merge y Limpiar", "type": "main", "index": 0 }]] },
+    "Merge y Limpiar": { "main": [[ { "node": "Guardar Snapshot", "type": "main", "index": 0 }, { "node": "Análisis Anterior", "type": "main", "index": 0 } ]] },
+    "Guardar Snapshot": { "main": [[{ "node": "Construir Prompt", "type": "main", "index": 0 }]] },
+    "Análisis Anterior": { "main": [[{ "node": "Construir Prompt", "type": "main", "index": 0 }]] },
+    "Construir Prompt": { "main": [[{ "node": "Claude Haiku", "type": "main", "index": 0 }]] },
+    "Claude Haiku": { "main": [[{ "node": "Parsear Respuesta", "type": "main", "index": 0 }]] },
+    "Parsear Respuesta": { "main": [[{ "node": "Guardar Análisis", "type": "main", "index": 0 }]] }
+  }
+}

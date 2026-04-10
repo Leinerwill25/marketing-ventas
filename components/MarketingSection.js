@@ -140,11 +140,156 @@ function LoadingState() {
   );
 }
 
+function AnalysisSelector({ analyses, selectedId, onSelect }) {
+  if (!analyses || analyses.length < 2) return null;
+  
+  return (
+    <div className="flex items-center gap-3 flex-wrap">
+      <span className="text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">
+        📅 Ver análisis:
+      </span>
+      <div className="flex gap-2 flex-wrap">
+        {analyses.map((a, i) => {
+          const tc = TREND_CONFIG[a.trend] || TREND_CONFIG.estancado;
+          const isSelected = a.id === selectedId;
+          const changedCount = Object.values(a.segment_statuses || {}).filter(s => s === 'changed').length;
+          return (
+            <button
+              key={a.id}
+              onClick={() => onSelect(a.id)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
+                isSelected 
+                  ? 'bg-[#4A7DE8] text-white border-blue-600 shadow-lg shadow-blue-100' 
+                  : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+              }`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : tc.dot}`} />
+              {a.date}
+              {i === 0 && <span className={isSelected ? 'text-blue-200' : 'text-blue-500'}>← Actual</span>}
+              {changedCount > 0 && !isSelected && (
+                <span className="bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded text-[9px]">
+                  {changedCount} cambios
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function SegmentComparison({ segmentKey, segmentLabel, icon, currentData, previousData, comparisonInfo, status }) {
+  const currentStrategies = currentData?.[`strategy_${segmentKey}`] || [];
+  const previousStrategies = previousData?.[`strategy_${segmentKey}`] || [];
+  const info = comparisonInfo?.[segmentKey] || {};
+  const isMaintained = status === 'maintained';
+
+  if (isMaintained) {
+    return (
+      <div className="card-elegant rounded-2xl overflow-hidden bg-white mb-4">
+        <div className="p-4 border-b border-gray-50 flex items-center gap-3">
+          <span className="text-lg">{icon}</span>
+          <span className="font-bold text-sm text-gray-900">{segmentLabel}</span>
+          <span className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+            ✅ Estrategia mantenida — Funcionando
+          </span>
+        </div>
+        <div className="p-4 space-y-3">
+          {info.reasoning && (
+            <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+              <p className="text-xs font-bold text-emerald-700 mb-1">🧠 Por qué se mantiene:</p>
+              <p className="text-sm text-gray-700 leading-relaxed">{info.reasoning}</p>
+            </div>
+          )}
+          {info.expected_impact && (
+            <p className="text-xs text-gray-400 italic">
+              🎯 Impacto esperado: {info.expected_impact}
+            </p>
+          )}
+          <div className="space-y-2">
+            {currentStrategies.map((s, i) => (
+              <div key={i} className="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                <p className="text-sm font-medium text-gray-800">{s.accion}</p>
+                {s.metrica && <p className="text-xs text-gray-500 italic mt-1">📊 {s.metrica}</p>}
+                {s.formato && <span className="tag bg-blue-50 text-blue-700 border-blue-200 border mt-1 inline-block">{s.formato}</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="card-elegant rounded-2xl overflow-hidden bg-white mb-4">
+      <div className="p-4 border-b border-gray-50 flex items-center gap-3 flex-wrap">
+        <span className="text-lg">{icon}</span>
+        <span className="font-bold text-sm text-gray-900">{segmentLabel}</span>
+        <span className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-orange-50 text-orange-700 border border-orange-200">
+          🔄 Estrategia actualizada
+        </span>
+      </div>
+
+      {info.reasoning && (
+        <div className="px-4 pt-3 pb-0">
+          <div className="p-3 bg-blue-50 rounded-xl border border-blue-100">
+            <p className="text-xs font-bold text-blue-700 mb-1">🧠 Por qué cambió:</p>
+            <p className="text-sm text-gray-700 leading-relaxed">{info.reasoning}</p>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-3 p-4">
+        <div className="space-y-2">
+          <div className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5 mb-2">
+            <span className="w-2 h-2 rounded-full bg-gray-300" />
+            Estrategia anterior
+          </div>
+          {previousStrategies.length > 0 ? (
+            previousStrategies.map((s, i) => (
+              <div key={i} className="p-3 bg-gray-50 rounded-xl border border-gray-200 opacity-75">
+                <p className="text-xs font-medium text-gray-600 leading-relaxed line-through decoration-gray-400">{s.accion}</p>
+                {s.metrica && <p className="text-[10px] text-gray-400 italic mt-1">{s.metrica}</p>}
+              </div>
+            ))
+          ) : (
+            <div className="p-3 bg-gray-50 rounded-xl border border-gray-200 text-xs text-gray-400 italic">
+              Sin estrategia previa registrada
+            </div>
+          )}
+          {info.previous_summary && info.previous_summary !== 'Sin estrategia previa' && (
+            <p className="text-[10px] text-gray-400 italic px-1">{info.previous_summary}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <div className="text-xs font-bold text-blue-600 uppercase tracking-wider flex items-center gap-1.5 mb-2">
+            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+            Nueva estrategia
+          </div>
+          {currentStrategies.map((s, i) => (
+            <div key={i} className="p-3 bg-blue-50 rounded-xl border border-blue-200">
+              <p className="text-xs font-medium text-gray-800 leading-relaxed">{s.accion}</p>
+              {s.metrica && <p className="text-[10px] text-blue-600 italic mt-1">📊 {s.metrica}</p>}
+              {s.formato && <span className="tag bg-blue-100 text-blue-800 border-blue-200 border mt-1 inline-block text-[9px]">{s.formato}</span>}
+            </div>
+          ))}
+          {info.expected_impact && (
+            <p className="text-[10px] text-blue-600 italic px-1">🎯 {info.expected_impact}</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── TABS ──────────────────────────────────────────────────────────────────────
 const TABS = [
   { id: 'overview', label: 'Panorama', icon: '📡' },
   { id: 'profiles', label: 'Perfiles', icon: '👥' },
   { id: 'strategies', label: 'Estrategias IA', icon: '🤖' },
+  { id: 'compare', label: 'Comparativa', icon: '⚖️' },
   { id: 'content', label: 'Contenido', icon: '🎬' },
   { id: 'hashtags', label: 'Hashtags', icon: '#' },
   { id: 'history', label: 'Historial', icon: '📈' }
@@ -153,22 +298,32 @@ const TABS = [
 // ─── MAIN COMPONENT ────────────────────────────────────────────────────────────
 export default function MarketingSection() {
   const [activeTab, setActiveTab] = useState('overview');
+  const [selectedAnalysisId, setSelectedAnalysisId] = useState(null);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lastRefresh, setLastRefresh] = useState(null);
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (analysisId = null) => {
     setLoading(true);
     try {
-      const res = await fetch('/api/marketing-intel');
+      const url = analysisId 
+        ? `/api/marketing-intel?id=${analysisId}`
+        : '/api/marketing-intel';
+      const res = await fetch(url);
       const json = await res.json();
       setData(json);
+      if (json.id && !selectedAnalysisId) setSelectedAnalysisId(json.id);
       setLastRefresh(new Date().toLocaleString('es-VE'));
     } catch (e) {
       setData({ hasData: false, error: 'Error conectando con la base de datos' });
     }
     setLoading(false);
-  }, []);
+  }, [selectedAnalysisId]);
+
+  const handleSelectAnalysis = useCallback(async (analysisId) => {
+    setSelectedAnalysisId(analysisId);
+    await loadData(analysisId);
+  }, [loadData]);
 
   useEffect(() => {
     loadData();
@@ -196,12 +351,22 @@ export default function MarketingSection() {
                 {trend.label}
               </span>
             )}
-            <button onClick={loadData} disabled={loading}
+            <button onClick={() => loadData(selectedAnalysisId)} disabled={loading}
               className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all disabled:opacity-50">
               {loading ? '...' : '↻ Actualizar'}
             </button>
           </div>
         </div>
+
+        {data?.analyses_list?.length > 1 && activeTab === 'compare' && (
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            <AnalysisSelector
+              analyses={data.analyses_list}
+              selectedId={selectedAnalysisId}
+              onSelect={handleSelectAnalysis}
+            />
+          </div>
+        )}
 
         {data?.analysis_date && (
           <div className="flex items-center gap-4 text-xs text-gray-400">
@@ -540,6 +705,101 @@ export default function MarketingSection() {
                   <div className="flex items-start gap-2"><span className="text-blue-500">→</span> Nunca repetir exactamente el mismo set dos veces seguidas</div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* COMPARATIVA */}
+          {activeTab === 'compare' && (
+            <div className="space-y-4">
+              {/* Selector de análisis */}
+              {data?.analyses_list?.length > 1 && (
+                <div className="card-elegant rounded-2xl p-4 bg-white">
+                  <AnalysisSelector
+                    analyses={data.analyses_list}
+                    selectedId={selectedAnalysisId}
+                    onSelect={handleSelectAnalysis}
+                  />
+                </div>
+              )}
+
+              {/* KPI Delta card */}
+              {data?.kpi_delta?.has_history && (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[
+                    {
+                      label: 'Seguidores ganados',
+                      val: data.kpi_delta.follower_delta >= 0 
+                        ? `+${data.kpi_delta.follower_delta}` 
+                        : `${data.kpi_delta.follower_delta}`,
+                      color: data.kpi_delta.follower_delta > 0 
+                        ? 'text-emerald-600' 
+                        : data.kpi_delta.follower_delta === 0 
+                          ? 'text-amber-500' 
+                          : 'text-red-500',
+                      note: `en ${data.kpi_delta.period_days} días`
+                    },
+                    {
+                      label: 'Tendencia actual',
+                      val: TREND_CONFIG[data.trend]?.label || 'Estancado →',
+                      color: TREND_CONFIG[data.trend]?.text || 'text-amber-700',
+                      note: 'vs período anterior'
+                    },
+                    {
+                      label: 'Segmentos actualizados',
+                      val: Object.values(data.segment_statuses || {}).filter(s => s === 'changed').length,
+                      color: 'text-blue-600',
+                      note: 'de 5 segmentos'
+                    }
+                  ].map(k => (
+                    <div key={k.label} className="card-elegant rounded-2xl p-4 bg-white text-center">
+                      <div className={`text-2xl font-black ${k.color}`} style={{ fontFamily: 'var(--font-display)' }}>
+                        {k.val}
+                      </div>
+                      <div className="text-[10px] font-bold text-gray-400 uppercase mt-0.5">{k.label}</div>
+                      <div className="text-[9px] text-gray-300 mt-0.5">{k.note}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Sin historial aún */}
+              {!data?.kpi_delta?.has_history && data?.hasData && (
+                <div className="card-elegant rounded-2xl p-8 bg-white text-center">
+                  <div className="text-3xl mb-2">⚖️</div>
+                  <h3 className="font-black text-gray-900 mb-1" style={{ fontFamily: 'var(--font-display)' }}>
+                    Primer análisis registrado
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    La comparativa aparecerá cuando haya al menos 2 análisis. 
+                    El próximo se genera automáticamente en 3 días.
+                  </p>
+                </div>
+              )}
+
+              {/* Comparativa por segmento */}
+              {data?.hasData && (
+                <div className="space-y-0">
+                  <p className="section-title mb-3">Análisis por segmento</p>
+                  {[
+                    { key: 'recepcionista', label: 'Recepcionista / Asistente', icon: '📋' },
+                    { key: 'medico_independiente', label: 'Médico independiente', icon: '🩺' },
+                    { key: 'director_clinica', label: 'Director de clínica', icon: '🏥' },
+                    { key: 'paciente', label: 'Paciente (canal indirecto)', icon: '👤' },
+                    { key: 'especialista', label: 'Especialista en clínica', icon: '🔬' }
+                  ].map(seg => (
+                    <SegmentComparison
+                      key={seg.key}
+                      segmentKey={seg.key}
+                      segmentLabel={seg.label}
+                      icon={seg.icon}
+                      currentData={data}
+                      previousData={data.previous_analysis}
+                      comparisonInfo={data.comparison_analysis}
+                      status={data.segment_statuses?.[seg.key] || 'changed'}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

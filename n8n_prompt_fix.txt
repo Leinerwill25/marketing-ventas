@@ -1,0 +1,83 @@
+// n8n Code Node - Build AI Prompt (Version Robusta - Nombres en Ingles)
+
+const NODE_NAMES = {
+  MERGE: '6. Merge & Clean Data',
+  SAVE: '7. Save Snapshot → Supabase',
+  HISTORY: '8. Get Previous Analysis' // Volvemos a ingles
+};
+
+try {
+  // 1. Obtencion segura de datos (evita el error de "Node hasn't been executed")
+  const getSafeItem = (name) => {
+    try {
+      return $(name).item.json;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const mergedData = getSafeItem(NODE_NAMES.MERGE);
+  const snapshotResult = getSafeItem(NODE_NAMES.SAVE);
+  
+  // Para el historial usamos .all() que es mas seguro si hay 0 resultados
+  let prevAnalysis = null;
+  try {
+    const historyItems = $(NODE_NAMES.HISTORY).all();
+    if (historyItems && historyItems.length > 0) {
+      prevAnalysis = historyItems[0].json;
+    }
+  } catch (e) {
+    // Si el nodo no se ha ejecutado aun, simplemente devolvemos null y seguimos
+    console.log("Historial no disponible.");
+  }
+
+  // 2. Validacion de datos
+  if (!mergedData || !mergedData.analysis_input) {
+    throw new Error("No se encontraron datos en el nodo 6. Asegurate de que el flujo llegue hasta aqui.");
+  }
+
+  const snapshotId = snapshotResult?.id || null;
+  const newData = mergedData.analysis_input;
+
+  // 3. Construccion del prompt
+  const promptInput = {
+    fecha: newData.date,
+    ashira_seguidores: newData.ashira_followers,
+    competidores: (newData.accounts || []).map(a => ({
+      cuenta: a.username,
+      seguidores: a.followers
+    })),
+    top_posts: (newData.top_posts || []).slice(0, 5).map(p => ({
+      cuenta: p.account,
+      likes: p.likes,
+      comentarios: p.comments,
+      vistas: p.views,
+      caption_preview: (p.caption || '').substring(0, 100)
+    })),
+    hashtags_trending: (newData.hashtags || []).slice(0, 10).map(h => h.tag || h),
+    analisis_anterior: prevAnalysis ? {
+      fecha: prevAnalysis.analysis_date,
+      tendencia: prevAnalysis.trend,
+      estrategias_activas: (
+        (safeParse(prevAnalysis.strategy_recepcionista)).length +
+        (safeParse(prevAnalysis.strategy_medico_independiente)).length
+      )
+    } : null
+  };
+
+  return [{ json: { promptInput, snapshotId, hasHistory: !!prevAnalysis } }];
+
+} catch (error) {
+  return [{
+    json: {
+      error: error.message,
+      status: 'failed'
+    }
+  }];
+}
+
+function safeParse(val) {
+  if (!val) return [];
+  if (Array.isArray(val)) return val;
+  try { return JSON.parse(val); } catch (e) { return []; }
+}

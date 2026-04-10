@@ -1,0 +1,93 @@
+// n8n Code Node - Parse & Prepare DB Record (ULTRA ROBUST VERSION)
+
+const claudeResponse = $('10. Claude Haiku').item.json;
+const promptData = $('9. Construir Prompt').item.json;
+
+// 1. Obtencion de texto bruto
+let rawText = '';
+try {
+    if (claudeResponse?.content?.[0]?.text) {
+        rawText = claudeResponse.content[0].text;
+    } else if (typeof claudeResponse?.content === 'string') {
+        rawText = claudeResponse.content;
+    } else {
+        rawText = JSON.stringify(claudeResponse);
+    }
+} catch (e) {
+    rawText = "ERROR_OBTAINING_TEXT";
+}
+
+// 2. Extractor de JSON basado en limites de llaves
+function extractJson(text) {
+    const start = text.indexOf('{');
+    const end = text.lastIndexOf('}');
+    if (start !== -1 && end !== -1 && end > start) {
+        return text.substring(start, end + 1);
+    }
+    return null;
+}
+
+const cleanedJson = extractJson(rawText);
+
+let analysis = null;
+let parseError = null;
+
+if (cleanedJson) {
+    try {
+        // Remplazamos posibles caracteres invalidos de traduccion (como comillas curvas)
+        const sanitized = cleanedJson
+            .replace(/[“”]/g, '"')
+            .replace(/[‘’]/g, "'")
+            .trim();
+        analysis = JSON.parse(sanitized);
+    } catch (e) {
+        parseError = e.message;
+    }
+} else {
+    parseError = "No se encontraron llaves { } en la respuesta";
+}
+
+// 3. Fallback si el parseo fallo
+if (!analysis || parseError) {
+    analysis = {
+        trend: 'estancado',
+        competitive_summary: { 
+            insight_principal: `Error de Parseo: ${parseError || 'Desconocido'}`,
+            oportunidad_detectada: 'Revisar consola de n8n para ver respuesta bruta',
+            amenaza_principal: '' 
+        },
+        strategy_recepcionista: [],
+        strategy_medico_independiente: [],
+        strategy_director_clinica: [],
+        strategy_paciente: [],
+        strategy_especialista: [],
+        changes_vs_previous: [`Respuesta bruta recibida: ${rawText.substring(0, 500)}...`]
+    };
+}
+
+// 4. Calculo de costos (Claude 3 Haiku)
+const inputTokens = claudeResponse?.usage?.input_tokens || 0;
+const outputTokens = claudeResponse?.usage?.output_tokens || 0;
+const costUsd = (inputTokens / 1000000 * 0.25) + (outputTokens / 1000000 * 1.25);
+
+// 5. Retorno final con nombres exactos de la DB (INGLES)
+return [{
+    json: {
+        analysis_date: new Date().toISOString().split('T')[0],
+        snapshot_id: promptData.snapshotId,
+        competitive_summary: JSON.stringify(analysis.competitive_summary || {}),
+        strategy_recepcionista: JSON.stringify(analysis.strategy_recepcionista || []),
+        strategy_medico_independiente: JSON.stringify(analysis.strategy_medico_independiente || []),
+        strategy_director_clinica: JSON.stringify(analysis.strategy_director_clinica || []),
+        strategy_paciente: JSON.stringify(analysis.strategy_paciente || []),
+        strategy_especialista: JSON.stringify(analysis.strategy_especialista || []),
+        content_recommendations: JSON.stringify(analysis.content_recommendations || []),
+        content_insights: JSON.stringify(analysis.content_insights || {}),
+        hashtag_strategy: JSON.stringify(analysis.content_insights?.hashtags_recomendados || []),
+        changes_vs_previous: JSON.stringify(analysis.changes_vs_previous || []),
+        trend: analysis.trend || 'estancado',
+        tokens_used: inputTokens + outputTokens,
+        analysis_cost_usd: parseFloat(costUsd.toFixed(6)),
+        model_version: 'claude-3-haiku-20240307'
+    }
+}];
