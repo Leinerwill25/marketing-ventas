@@ -512,6 +512,606 @@ function MsgBlock({ text, color = 'blue' }) {
 
 // --- SECTIONS ---
 
+function MarketingSection() {
+  const [mActive, setMActive] = useState('panorama');
+  const [copyStatus, setCopyStatus] = useState('');
+
+  const mTabs = [
+    { id: 'panorama', label: 'Panorama Competitivo', icon: '🔍' },
+    { id: 'perfiles', label: 'Perfiles de Cliente', icon: '👤' },
+    { id: 'contenido', label: 'Estrategia de Contenido', icon: '📱' },
+    { id: 'pacientes', label: 'Estrategia de Pacientes', icon: '🤝' },
+    { id: 'reels', label: 'Ideas de Reels', icon: '⚡' },
+    { id: 'calendario', label: 'Calendario', icon: '📅' },
+    { id: 'seo', label: 'Hashtags y SEO', icon: '🏷️' },
+    { id: 'kpis', label: 'KPIs y Seguimiento', icon: '📈' },
+  ];
+
+  const handleCopyHash = (text) => {
+    navigator.clipboard.writeText(text);
+    setCopyStatus('¡Copiados!');
+    setTimeout(() => setCopyStatus(''), 2000);
+  };
+
+  const renderTab = () => {
+    switch (mActive) {
+      case 'panorama':
+        return (
+          <div className="space-y-6 fade-in">
+            <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 flex items-start gap-4">
+              <span className="text-2xl mt-1">📡</span>
+              <p className="text-sm text-blue-900 leading-relaxed font-medium">
+                Datos extraídos de Sonda Labs. El mercado venezolano de software médico tiene 4 jugadores activos en Instagram. 
+                ASHIRA tiene la audiencia más pequeña pero el único diferenciador que ningún competidor tiene: 
+                <span className="font-black"> portal de pacientes + soporte a clínicas domiciliarias.</span>
+              </p>
+            </div>
+
+            <div className="card-elegant overflow-hidden rounded-2xl bg-white border border-gray-100">
+              <div className="overflow-x-auto no-scrollbar">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                      <th className="px-6 py-4 font-black tracking-tight text-gray-500 uppercase text-[10px]">Cuenta</th>
+                      <th className="px-6 py-4 font-black tracking-tight text-gray-500 uppercase text-[10px]">Seguidores</th>
+                      <th className="px-6 py-4 font-black tracking-tight text-gray-500 uppercase text-[10px]">Estrategia actual</th>
+                      <th className="px-6 py-4 font-black tracking-tight text-gray-500 uppercase text-[10px]">Debilidad</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    <tr>
+                      <td className="px-6 py-4 font-bold text-blue-600">@docsiapp</td>
+                      <td className="px-6 py-4 font-medium">12.8K</td>
+                      <td className="px-6 py-4 text-xs">Innovación/edu tech</td>
+                      <td className="px-6 py-4 text-xs font-medium text-red-500">Crecimiento cero, no habla de médicos</td>
+                    </tr>
+                    <tr>
+                      <td className="px-6 py-4 font-bold text-blue-600">@hipocrates.salud</td>
+                      <td className="px-6 py-4 font-medium">4.9K</td>
+                      <td className="px-6 py-4 text-xs">Pagos y reportes</td>
+                      <td className="px-6 py-4 text-xs font-medium text-red-500">0 comentarios, muy corporativo</td>
+                    </tr>
+                    <tr>
+                      <td className="px-6 py-4 font-bold text-blue-600">@docguia.inc</td>
+                      <td className="px-6 py-4 font-medium">4.5K</td>
+                      <td className="px-6 py-4 text-xs">Etiquetado de médicos</td>
+                      <td className="px-6 py-4 text-xs font-medium text-red-500">No tiene portal de pacientes</td>
+                    </tr>
+                    <tr>
+                      <td className="px-6 py-4 font-bold text-emerald-600">@ashira_soft</td>
+                      <td className="px-6 py-4 font-medium">242</td>
+                      <td className="px-6 py-4 text-xs">En construcción</td>
+                      <td className="px-6 py-4 text-xs font-medium italic text-gray-400">Bajo volumen de contenido</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 rounded-2xl p-6 shadow-sm">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-xl">💡</span>
+                <h3 className="text-sm font-black text-emerald-900 tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>La oportunidad real</h3>
+              </div>
+              <p className="text-sm text-emerald-800 leading-relaxed font-medium">
+                El competidor con más seguidores (12.8K) tiene crecimiento CERO. Nadie en el sector está publicando contenido 
+                dirigido a <span className="font-bold underline decoration-emerald-200">recepcionistas y asistentes de citas</span> — el perfil más fácil de convertir. 
+                Hay un nicho libre esperando a ASHIRA.
+              </p>
+            </div>
+
+            <div className="card-elegant rounded-2xl overflow-hidden bg-white border-2 border-amber-100 group transition-all hover:border-amber-200">
+              <div className="bg-amber-50 px-6 py-4 border-b border-amber-100 flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">⭐</span>
+                  <span className="text-[11px] font-black text-amber-800 uppercase tracking-widest">Post Estrella de la competencia</span>
+                </div>
+                <Tag color="amber">Técnica: Etiquetado</Tag>
+              </div>
+              <div className="p-6">
+                <p className="text-sm font-bold text-gray-800 mb-4 bg-gray-50 p-4 rounded-xl leading-relaxed">
+                  "Etiqueta a tu ginecólogo de confianza o envíale este post. Merece trabajar con herramientas del siglo 21 🫡"
+                </p>
+                <div className="flex gap-6 mb-6">
+                  <div className="text-center">
+                    <div className="text-xl font-black text-gray-900">69L</div>
+                    <div className="text-[9px] font-bold text-gray-400 uppercase">Likes</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-black text-gray-900">26C</div>
+                    <div className="text-[9px] font-bold text-gray-400 uppercase">Comentarios</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-black text-gray-900">912</div>
+                    <div className="text-[9px] font-bold text-gray-400 uppercase">Vistas</div>
+                  </div>
+                </div>
+                <div className="bg-blue-50/50 rounded-xl p-4 border border-blue-100/50">
+                  <p className="text-[11px] font-black text-blue-900 uppercase tracking-widest mb-1">Análisis Estratégico</p>
+                  <p className="text-xs text-blue-800 leading-relaxed font-medium italic">
+                    "Funcionó porque habla al PACIENTE, no al médico, y le pide que actúe (etiquetar). 
+                    Esta es la base de la Estrategia de Pacientes que ASHIRA puede dominar."
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      case 'perfiles':
+        return (
+          <div className="p-1 space-y-4 fade-in">
+            <div className="mb-6">
+              <p className="text-sm text-gray-500 font-medium">
+                ASHIRA no solo vende a médicos. Hay 6 perfiles que pueden adoptar, recomendar o exigir ASHIRA. 
+                Cada uno necesita un mensaje diferente.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Collapsible title="Recepcionista / Asistente" badge="PRIORIDAD MÁXIMA" badgeColor="green" icon="👩‍💻">
+                <div className="space-y-4 text-sm font-medium">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-red-500 font-black mb-1">Dolor Principal</p>
+                    <p className="text-gray-600 leading-relaxed italic">Caos diario — confirmar citas por WhatsApp, buscar historiales físicos, manejar llamadas mientras registra pacientes.</p>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-xl border border-blue-100">
+                    <p className="text-[10px] uppercase tracking-widest text-blue-600 font-black mb-1">Mensaje Clave</p>
+                    <p className="text-blue-900">"ASHIRA no te quita el trabajo — te quita el caos. Tus citas organizadas, los historiales en un clic."</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-widest text-gray-400 font-black mb-1">Canal Ideal</p>
+                      <p className="text-xs">Reels / Stories (Día a día)</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-widest text-gray-400 font-black mb-1">CTA Contenido</p>
+                      <p className="text-xs">"Etiqueta a tu recepcionista"</p>
+                    </div>
+                  </div>
+                </div>
+              </Collapsible>
+              <Collapsible title="Médico Independiente" badge="ALTA PRIORIDAD" badgeColor="blue" icon="🩺">
+                <div className="space-y-4 text-sm font-medium">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-red-500 font-black mb-1">Dolor Principal</p>
+                    <p className="text-gray-600 leading-relaxed italic">Administra solo. Siente que pierde tiempo valioso en lo administrativo en lugar de con sus pacientes.</p>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-xl border border-blue-100">
+                    <p className="text-[10px] uppercase tracking-widest text-blue-600 font-black mb-1">Mensaje Clave</p>
+                    <p className="text-blue-900">"Tu tiempo vale más que buscar papeles. ASHIRA hace lo administrativo por ti."</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-widest text-gray-400 font-black mb-1">Especialidades</p>
+                      <p className="text-xs">Pediatras, Ginecólogos, Dentistas</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-widest text-gray-400 font-black mb-1">Precio Ancla</p>
+                      <p className="text-xs">"Menos de una consulta"</p>
+                    </div>
+                  </div>
+                </div>
+              </Collapsible>
+              <Collapsible title="Director de Clínica" badge="ALTA PRIORIDAD" badgeColor="blue" icon="🏥">
+                <div className="space-y-4 text-sm font-medium">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-red-500 font-black mb-1">Dolor Principal</p>
+                    <p className="text-gray-600 leading-relaxed italic">Coordinar múltiples turnos y facturación. La desorganización le cuesta pacientes y credibilidad.</p>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-xl border border-blue-100">
+                    <p className="text-[10px] uppercase tracking-widest text-blue-600 font-black mb-1">Mensaje Clave</p>
+                    <p className="text-blue-900">"Centraliza tu clínica completa. Médicos coordinados y citas sin cruces."</p>
+                  </div>
+                  <p className="text-xs text- emerald-700 bg-emerald-50 p-2 rounded-lg italic">🎯 Un director convierte toda la clínica. Una venta = Múltiples usuarios activos.</p>
+                </div>
+              </Collapsible>
+              <Collapsible title="Enfermero/a" badge="PRIORIDAD MEDIA" badgeColor="amber" icon="💉">
+                <div className="space-y-4 text-sm font-medium">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-red-500 font-black mb-1">Dolor Principal</p>
+                    <p className="text-gray-600 leading-relaxed italic">Dependencia del expediente físico. Interrumpe al médico constantemente por falta de información.</p>
+                  </div>
+                  <div className="bg-amber-50 p-3 rounded-xl border border-amber-100">
+                    <p className="text-[10px] uppercase tracking-widest text-amber-600 font-black mb-1">Mensaje Clave</p>
+                    <p className="text-amber-900">"Toda la historia en tu teléfono, sin interrumpir al doctor ni buscar papeles."</p>
+                  </div>
+                </div>
+              </Collapsible>
+              <Collapsible title="Especialista en Clínica" badge="PRIORIDAD MEDIA" badgeColor="amber" icon="🧬">
+                <div className="space-y-4 text-sm font-medium">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-red-500 font-black mb-1">Dolor Principal</p>
+                    <p className="text-gray-600 leading-relaxed italic">Comparte espacio pero necesita su propia agenda privada y que no se cruce con otros especialistas.</p>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-xl border border-blue-100">
+                    <p className="text-[10px] uppercase tracking-widest text-blue-600 font-black mb-1">Mensaje Clave</p>
+                    <p className="text-blue-900">"Tu consultorio, tu agenda, tus pacientes — todo tuyo, aunque compartas el espacio."</p>
+                  </div>
+                </div>
+              </Collapsible>
+              <Collapsible title="Paciente (Canal Indirecto)" badge="ESTRATÉGICO" badgeColor="mint" icon="👥">
+                <div className="space-y-4 text-sm font-medium">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-red-500 font-black mb-1">Dolor Principal</p>
+                    <p className="text-gray-600 leading-relaxed italic">No tiene acceso a su historial. Depende de que el médico recuerde o de llevar una carpeta.</p>
+                  </div>
+                  <div className="bg-teal-50 p-3 rounded-xl border border-teal-100">
+                    <p className="text-[10px] uppercase tracking-widest text-teal-600 font-black mb-1">Estrategia de Activación</p>
+                    <p className="text-teal-900">"¿Tu médico ya usa ASHIRA? Pídele que lo implemente — es gratis para empezar."</p>
+                  </div>
+                  <p className="text-xs text-blue-800 italic">💡 Un paciente pidiendo una herramienta es la venta más fácil del mundo.</p>
+                </div>
+              </Collapsible>
+            </div>
+          </div>
+        );
+      case 'contenido':
+        return (
+          <div className="space-y-6 fade-in">
+            <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-2 font-black text-gray-900 uppercase text-xs tracking-widest">
+                <span className="w-2 h-4 bg-blue-500 rounded-sm" /> Los 4 Pilares de Contenido
+              </div>
+              <p className="text-xs text-gray-500 font-medium">Construir autoridad y confianza ANTES de que el lead llegue al DM.</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="card-elegant p-5 rounded-2xl bg-white border-l-4 border-red-400">
+                <div className="flex justify-between items-start mb-3">
+                  <span className="text-xs font-black text-red-600 tracking-widest uppercase">Pilar #1: DOLOR</span>
+                  <Tag color="blue">30%</Tag>
+                </div>
+                <p className="text-sm font-bold mb-2">Objetivo: "ESO ME PASA A MÍ"</p>
+                <p className="text-xs text-gray-500 leading-relaxed mb-3">Reels y carruseles sobre situaciones caóticas reales en consultorios.</p>
+                <p className="text-[10px] font-black italic text-gray-400">Regla: No mencionar ASHIRA directamente.</p>
+              </div>
+              <div className="card-elegant p-5 rounded-2xl bg-white border-l-4 border-blue-400">
+                <div className="flex justify-between items-start mb-3">
+                  <span className="text-xs font-black text-blue-600 tracking-widest uppercase">Pilar #2: EDUCACIÓN</span>
+                  <Tag color="blue">25%</Tag>
+                </div>
+                <p className="text-sm font-bold mb-2">Objetivo: POSICIONAR AUTORIDAD</p>
+                <p className="text-xs text-gray-500 leading-relaxed mb-3">Carruseles "3 errores que..." y tips sobre gestión médica profesional.</p>
+                <p className="text-[10px] font-black italic text-gray-400">Regla: ASHIRA es el facilitador del valor.</p>
+              </div>
+              <div className="card-elegant p-5 rounded-2xl bg-white border-l-4 border-emerald-400">
+                <div className="flex justify-between items-start mb-3">
+                  <span className="text-xs font-black text-emerald-600 tracking-widest uppercase">Pilar #3: PRUEBA SOCIAL</span>
+                  <Tag color="blue">25%</Tag>
+                </div>
+                <p className="text-sm font-bold mb-2">Objetivo: GENERAR CONFIANZA</p>
+                <p className="text-xs text-gray-500 leading-relaxed mb-3">Testimonios, casos de uso (SafeCare) y dashboards antes vs después.</p>
+                <p className="text-[10px] font-black italic text-gray-400">Regla: Datos específicos > Argumentos abstractos.</p>
+              </div>
+              <div className="card-elegant p-5 rounded-2xl bg-white border-l-4 border-teal-400">
+                <div className="flex justify-between items-start mb-3">
+                  <span className="text-xs font-black text-teal-600 tracking-widest uppercase">Pilar #4: COMUNIDAD</span>
+                  <Tag color="blue">20%</Tag>
+                </div>
+                <p className="text-sm font-bold mb-2">Objetivo: CREAR PERTENENCIA</p>
+                <p className="text-xs text-gray-500 leading-relaxed mb-3">Posts de etiquetado y encuestas interactivas en historias.</p>
+                <p className="text-[10px] font-black italic text-gray-400">Regla: Hablar en plural (ej. "Médicos del Siglo 21").</p>
+              </div>
+            </div>
+
+            <div className="card-elegant rounded-2xl bg-white overflow-hidden border border-gray-100">
+              <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                 <h3 className="text-xs font-black text-gray-900 tracking-widest uppercase">Frecuencia Semanal Recomendada</h3>
+                 <span className="animate-pulse w-3 h-3 bg-emerald-400 rounded-full" />
+              </div>
+              <div className="p-6">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  {[
+                    { d: 'LUN', f: 'Carrusel', p: 'Educación' },
+                    { d: 'MAR', f: 'Stories', p: 'Interacción' },
+                    { d: 'MIE', f: 'Reel', p: 'Dolor' },
+                    { d: 'JUE', f: 'Post', p: 'Prueba Social' },
+                    { d: 'VIE', f: 'Post', p: 'Comunidad' },
+                    { d: 'SAB', f: 'Reel/Meme', p: 'Humanizar' },
+                    { d: 'DMG', f: '-', p: 'Analizar métricas' },
+                    { d: 'TODO', f: 'Stories', p: 'Mínimo 1 diaria' },
+                  ].map((item, i) => (
+                    <div key={i} className="bg-gray-50 p-3 rounded-xl text-center border border-gray-100/50 transition-all hover:bg-white hover:shadow-sm">
+                      <div className="text-[10px] font-black text-gray-400 mb-1">{item.d}</div>
+                      <div className="text-xs font-bold text-blue-600">{item.f}</div>
+                      <div className="text-[10px] font-medium text-gray-500 mt-1">{item.p}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      case 'pacientes':
+        return (
+          <div className="space-y-6 fade-in">
+             <div className="bg-gradient-to-br from-teal-500 to-emerald-600 rounded-2xl p-6 text-white shadow-lg">
+               <h3 className="text-lg font-black tracking-tight mb-2" style={{ fontFamily: 'var(--font-display)' }}>Estrategia de Pacientes: El Canal Maestro</h3>
+               <p className="text-sm opacity-90 leading-relaxed font-medium">Un paciente que pide ASHIRA a su médico convierte 10x más que cualquier anuncio pagado. Es la distribución estratégica que ningún competidor ha activado.</p>
+             </div>
+
+             <div className="p-6 bg-white rounded-2xl border border-gray-100 card-elegant">
+                <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-6 text-center">El Mecanismo de Activación</p>
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                  {[
+                    { n: 1, t: 'Descubrimiento', d: 'El paciente ve el portal en IG o vía médicos.' },
+                    { n: 2, t: 'Valor Percibido', d: 'Entiende que tendrá su historial clínico móvil.' },
+                    { n: 3, t: 'Solicitud', d: 'Pregunta al médico: "¿Por qué no usas ASHIRA?"' },
+                    { n: 4, t: 'Conversión', d: 'El médico se registra motivado por su propio cliente.' }
+                  ].map((step, i) => (
+                    <React.Fragment key={i}>
+                      <div className="flex-1 flex flex-col items-center text-center max-w-[140px]">
+                        <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-black text-sm mb-3 border-2 border-emerald-200">
+                          {step.n}
+                        </div>
+                        <p className="text-xs font-bold text-gray-900 mb-1">{step.t}</p>
+                        <p className="text-[10px] text-gray-500 leading-tight font-medium">{step.d}</p>
+                      </div>
+                      {i < 3 && <div className="hidden md:block text-emerald-200 text-2xl">→</div>}
+                    </React.Fragment>
+                  ))}
+                </div>
+             </div>
+
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white p-5 rounded-2xl card-elegant border border-gray-100 border-t-4 border-emerald-500">
+                   <p className="text-xs font-black text-emerald-600 uppercase mb-3 tracking-widest">FORMA 1</p>
+                   <p className="text-sm font-bold mb-2">Contenido Directo</p>
+                   <p className="text-xs text-gray-500 leading-relaxed mb-4">"No más llevar carpetas. Tu historial viaja contigo."</p>
+                   <Tag color="emerald">CTA: Etiqueta tu médico</Tag>
+                </div>
+                <div className="bg-white p-5 rounded-2xl card-elegant border border-gray-100 border-t-4 border-blue-500">
+                   <p className="text-xs font-black text-blue-600 uppercase mb-3 tracking-widest">FORMA 2</p>
+                   <p className="text-sm font-bold mb-2">Anzuelo en Portal</p>
+                   <p className="text-xs text-gray-500 leading-relaxed mb-4">Cuando el paciente se registra, "exige" a su médico en el sistema.</p>
+                   <Tag color="blue">Notificación Directa</Tag>
+                </div>
+                <div className="bg-white p-5 rounded-2xl card-elegant border border-gray-100 border-t-4 border-purple-500">
+                   <p className="text-xs font-black text-purple-600 uppercase mb-3 tracking-widest">FORMA 3</p>
+                   <p className="text-sm font-bold mb-2">Referido Cruzado</p>
+                   <p className="text-xs text-gray-500 leading-relaxed mb-4">QR en sala de espera e invitaciones automáticas vía WhatsApp.</p>
+                   <Tag color="purple">Efecto Viral</Tag>
+                </div>
+             </div>
+          </div>
+        );
+      case 'reels':
+        return (
+          <div className="space-y-4 fade-in">
+             <div className="mb-4">
+                <p className="text-sm text-gray-500 font-medium">ASHIRA puede grabar Reels con teléfono. Estas son las ideas con mayor potencial de alcance orgánico.</p>
+             </div>
+             
+             {[
+               { n: 1, cat: 'DOLOR', t: 'Día de una recepcionista sin ASHIRA', concepts: 'Caos visual, teléfono sonando, papeles volando.', audio: 'Stress / Chaos sound', caption: 'Así empieza el día de miles de recepcionistas en Venezuela. ¿Reconoces esto? 👇\n\n#SoftwareMedico #GestionHospitalaria #ASHIRA', cta: 'Etiqueta a tu recepcionista' },
+               { n: 2, cat: 'DOLOR', t: '¿Cuántos WhatsApps por una cita?', concepts: 'Pantalla de chat infinito vs 1 clic en ASHIRA.', audio: 'Notification sounds loop', caption: 'Esto no debería tomar 15 mensajes. ASHIRA resuelve el agendamiento en segundos.\n\n#AgendaDigital #MedicinaDigital', cta: 'Prueba 15 días gratis' },
+               { n: 3, cat: 'TRANSFORMACIÓN', t: 'Recepcionista CON ASHIRA', concepts: 'Mismo consultorio, paz mental, todo digital.', audio: 'Peaceful / Chill lo-fi', caption: 'La misma recepción. Pero con el control total. 💙\n\n#ProductividadMedica #SaludDigital', cta: 'Link en Bio' },
+               { n: 4, cat: 'TRANSFORMACIÓN', t: 'Antes vs Después: La Agenda', concepts: 'Split screen Excel vs ASHIRA.', audio: 'Transition trend', caption: '$20/mes. Ese es el costo de cambiar el caos por el control.\n\n#ConsultorioDigital #VenezuelaMedica', cta: 'Únete a la fase de lanzamiento' },
+               { n: 5, cat: 'EDUCACIÓN', t: '3 errores que te cuestan pacientes', concepts: 'Lista rápida: Doble cita, pérdida de historia, demora.', audio: 'Voice over / List style', caption: 'El 80% de las clínicas pierden ingresos por estos 3 errores. ¿Cometes alguno?\n\n#GestionClinica #MedicosVenezuela', cta: '¿Cuál es el que más te pasa?' },
+               { n: 6, cat: 'COMUNIDAD', t: 'Etiqueta al médico del siglo 21', concepts: 'Uso de ASHIRA en iPad/Phone con estética premium.', audio: 'Modern tech / Cinematic', caption: 'Los médicos venezolanos merecen herramientas a la altura de su talento. 🇻🇪\n\n#SaludVenezuela #InnovacionMedica', cta: 'Etiquétalo abajo' },
+             ].map((reel, i) => (
+                <Collapsible key={i} title={`${reel.n}. ${reel.t}`} icon="⚡" badge={reel.cat} badgeColor={reel.cat === 'DOLOR' ? 'blue' : (reel.cat === 'TRANSFORMACIÓN' ? 'green' : 'purple')}>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <p className="text-[10px] font-black text-gray-400 uppercase mb-1">Concepto</p>
+                        <p className="text-xs text-gray-700 leading-relaxed font-medium">{reel.concepts}</p>
+                      </div>
+                      <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <p className="text-[10px] font-black text-gray-400 uppercase mb-1">Audio Sugerido</p>
+                        <p className="text-xs text-gray-700 leading-relaxed font-medium">🎵 {reel.audio}</p>
+                      </div>
+                    </div>
+                    <div className="bg-blue-50/50 p-3 rounded-xl border border-blue-100/50">
+                        <p className="text-[10px] font-black text-blue-600 uppercase mb-1">Copy Sugerido</p>
+                        <p className="text-xs text-blue-900 leading-relaxed font-medium italic whitespace-pre-wrap">{reel.caption}</p>
+                        <div className="mt-3 flex justify-end">
+                          <CopyButton text={reel.caption} />
+                        </div>
+                    </div>
+                    <p className="text-xs font-black text-emerald-600 uppercase">CTA: {reel.cta}</p>
+                  </div>
+                </Collapsible>
+             ))}
+          </div>
+        );
+      case 'calendario':
+        return (
+          <div className="fade-in space-y-6">
+            <div className="card-elegant bg-white rounded-2xl p-6 overflow-hidden border border-gray-100">
+              <h3 className="text-sm font-black text-gray-900 tracking-tight mb-4 uppercase text-xs">Plan de Ejecución Mensual</h3>
+              
+              <div className="hidden lg:block">
+                <div className="grid grid-cols-7 border-b border-gray-100 bg-gray-50/50 rounded-t-xl overflow-hidden">
+                  {['LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB', 'DOM'].map(d => (
+                    <div key={d} className="px-3 py-3 text-[10px] font-black text-gray-400 text-center tracking-widest">{d}</div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-7 border-l border-t border-gray-100">
+                  {/* Simplificado para ejemplo visual de 4 semanas */}
+                  {[
+                    { t: 'Lanzamiento Presencia', s: Array(7).fill({ f: 'R', p: 'D' }) },
+                    { t: 'Activación Asistentes', s: Array(7).fill({ f: 'P', p: 'E' }) },
+                    { t: 'Estrategia Pacientes', s: Array(7).fill({ f: 'S', p: 'PS' }) },
+                    { t: 'Urgencia Final', s: Array(7).fill({ f: 'R', p: 'C' }) }
+                  ].map((week, wi) => (
+                    <React.Fragment key={wi}>
+                      {Array(7).fill(0).map((_, di) => (
+                        <div key={di} className="border-r border-b border-gray-100 p-2 h-24 bg-white hover:bg-gray-50 transition-colors group">
+                           <div className="text-[9px] font-black text-gray-300 mb-1">DÍA {di+1 + (wi*7)}</div>
+                           <div className="text-[10px] font-bold text-blue-600 leading-tight">
+                              {di % 2 === 0 ? 'Reel: ' : 'Post: '}
+                           </div>
+                           <div className="text-[9px] text-gray-500 font-medium mt-1 leading-tight group-hover:text-gray-900 line-clamp-2">
+                             {['Dolor', 'Edu', 'Social', 'Comunidad', 'Venta'][di % 5]}...
+                           </div>
+                        </div>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </div>
+              </div>
+
+              <div className="lg:hidden space-y-4">
+                 {[1,2,3,4].map(w => (
+                   <Collapsible key={w} title={`Semana ${w}`} icon="🗓️" badge={`Fase: ${['Lanzamiento', 'Activación', 'Pacientes', 'Conversión'][w-1]}`} badgeColor="blue">
+                      <div className="space-y-3">
+                         {['Lunes', 'Miércoles', 'Viernes'].map(d => (
+                           <div key={d} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                              <span className="w-12 text-[10px] font-black text-gray-400">{d.toUpperCase()}</span>
+                              <div className="flex-1">
+                                <p className="text-xs font-bold text-blue-600">{d === 'Miércoles' ? '⚡ Reel' : '📱 Post'}</p>
+                                <p className="text-[10px] text-gray-500 font-medium">Contenido táctico semanal</p>
+                              </div>
+                           </div>
+                         ))}
+                      </div>
+                   </Collapsible>
+                 ))}
+              </div>
+            </div>
+          </div>
+        );
+      case 'seo':
+        const h1 = "#MédicosVenezuela #SaludDigital #MedicinaVenezuela #Medicos #GestionMedica #SoftwareMedico #SaludEnCasa #Telemedicina #InnovacionMedica #MedicinaModerna";
+        const h2 = "#GestionClinica #AgendaDigital #HistoriaClinica #PortalDePaciente #SoftwareSalud #ProductividadMedica #CentrosMedicos #EscalabilidadMedica #AgendasMedicas #GestionConsultorio";
+        const h3 = "#ConsultorioVenezuela #ClinicaPrivada #MedicoVenezolano #SaludPrivadaVenezuela #TecnologiaMedica #DigitalizacionMedica #ConsultorioDigital #ASHIRASalud";
+
+        return (
+          <div className="space-y-6 fade-in">
+             <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+                <p className="text-sm text-gray-500 font-medium">Mezcla siempre hashtags grandes, medianos y específicos para maximizar el alcance sin perder relevancia.</p>
+             </div>
+             
+             <div className="space-y-4">
+                <div className="bg-white p-5 rounded-2xl border border-gray-100 card-elegant">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Grupo 1: Sector & Especialidad</span>
+                    <button onClick={() => handleCopyHash(h1)} className="text-[10px] font-bold text-gray-400 hover:text-blue-600 transition-colors">Copiar Grupo</button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {h1.split(' ').map((h, i) => <span key={i} className="text-[10px] px-2 py-1 bg-blue-50 text-blue-800 rounded-lg font-bold border border-blue-100/50">{h}</span>)}
+                  </div>
+                </div>
+
+                <div className="bg-white p-5 rounded-2xl border border-gray-100 card-elegant">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Grupo 2: Producto & Función</span>
+                    <button onClick={() => handleCopyHash(h2)} className="text-[10px] font-bold text-gray-400 hover:text-emerald-600 transition-colors">Copiar Grupo</button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {h2.split(' ').map((h, i) => <span key={i} className="text-[10px] px-2 py-1 bg-emerald-50 text-emerald-800 rounded-lg font-bold border border-emerald-100/50">{h}</span>)}
+                  </div>
+                </div>
+
+                <div className="bg-white p-5 rounded-2xl border border-gray-100 card-elegant">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-[10px] font-black text-teal-600 uppercase tracking-widest">Grupo 3: Comunidad & Local</span>
+                    <button onClick={() => handleCopyHash(h3)} className="text-[10px] font-bold text-gray-400 hover:text-teal-600 transition-colors">Copiar Grupo</button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {h3.split(' ').map((h, i) => <span key={i} className="text-[10px] px-2 py-1 bg-teal-50 text-teal-800 rounded-lg font-bold border border-teal-100/50">{h}</span>)}
+                  </div>
+                </div>
+
+                <button onClick={() => handleCopyHash(`${h1} ${h2} ${h3}`)} className="w-full py-4 bg-gray-900 text-white rounded-2xl font-black text-xs tracking-widest uppercase hover:bg-black transition-all shadow-lg active:scale-95">
+                  🚀 {copyStatus || 'Copiar Set Completo'}
+                </button>
+             </div>
+          </div>
+        );
+      case 'kpis':
+        return (
+          <div className="space-y-8 fade-in">
+             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {[
+                  { l: 'Seguidores Nuevos', v: '+50/sem', c: 'blue' },
+                  { l: 'Alcance Reel', v: '500+ vistas', c: 'blue' },
+                  { l: 'DMs Recibidos', v: '5+/sem', c: 'emerald' },
+                  { l: 'Leads Calificados', v: '20+/mes', c: 'emerald' },
+                  { l: 'Ratio DM→Trial', v: '25%', c: 'purple' },
+                  { l: 'Registros Trial', v: '10+/mes', c: 'teal' }
+                ].map((kpi, i) => (
+                  <div key={i} className="bg-white p-5 rounded-2xl card-elegant border border-gray-100 text-center">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{kpi.l}</p>
+                    <p className={`text-xl font-black text-${kpi.c}-600 tracking-tighter`} style={{ fontFamily: 'var(--font-display)' }}>{kpi.v}</p>
+                  </div>
+                ))}
+             </div>
+
+             <div className="flex flex-col items-center py-6">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-8">Embudo de Conversión Ideal</p>
+                <div className="relative w-full max-w-sm space-y-1">
+                   {[
+                    { t: 'Impresiones', r: '100%', w: 'w-full', c: 'bg-blue-600' },
+                    { t: 'Seguidores', r: '2%', w: 'w-[90%]', c: 'bg-blue-500' },
+                    { t: 'DMs', r: '10%', w: 'w-[80%]', c: 'bg-blue-400' },
+                    { t: 'Leads', r: '20%', w: 'w-[70%]', c: 'bg-emerald-500' },
+                    { t: 'Trial', r: '33%', w: 'w-[60%]', c: 'bg-emerald-400' },
+                    { t: 'Pago', r: '50%', w: 'w-[50%]', c: 'bg-teal-400' }
+                   ].map((f, i) => (
+                     <div key={i} className="flex items-center gap-3">
+                        <div className={`h-10 ${f.w} ${f.c} mx-auto flex items-center justify-center text-white font-black text-[9px] uppercase tracking-widest shadow-sm border border-white/10`} style={{ clipPath: 'polygon(5% 0%, 95% 0%, 100% 100%, 0% 100%)' }}>
+                          {f.t}
+                        </div>
+                        <div className="w-10 text-[10px] font-black text-emerald-600">{i > 0 && f.r}</div>
+                     </div>
+                   ))}
+                </div>
+             </div>
+
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-white p-6 rounded-2xl border border-gray-100 card-elegant">
+                   <h3 className="text-xs font-black text-gray-900 uppercase tracking-widest mb-4">Checklist Semanal</h3>
+                   <div className="space-y-3">
+                      {['Reels publicados (meta: 2)', 'DMs nuevos recibidos', 'Leads que pidieron precio', 'Clics en link de registro', 'Registros de trial', 'DMs de seguimiento'].map((t, i) => (
+                        <div key={i} className="flex items-center gap-3">
+                           <div className="w-4 h-4 border-2 border-gray-200 rounded flex-shrink-0" />
+                           <span className="text-xs text-gray-600 font-medium">{t}</span>
+                        </div>
+                      ))}
+                   </div>
+                </div>
+                <div className="bg-red-50 p-6 rounded-2xl border border-red-100">
+                  <h3 className="text-xs font-black text-red-600 uppercase tracking-widest mb-4">Señales de Alerta ⚠️</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-[10px] font-black text-red-800 uppercase">Engagement &lt; 3%</p>
+                      <p className="text-xs text-red-600">Cambiar tipo de contenido/audio.</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-red-800 uppercase">0 DMs en la semana</p>
+                      <p className="text-xs text-red-600">El contenido no tiene CTA claro.</p>
+                    </div>
+                    <div>
+                       <p className="text-[10px] font-black text-red-800 uppercase">DMs sin conversión</p>
+                       <p className="text-xs text-red-600">Problemas en el follow-up (Revisar Playbook).</p>
+                    </div>
+                  </div>
+                </div>
+             </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="space-y-8 pb-10">
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2">
+        {mTabs.map(tab => (
+          <button key={tab.id} onClick={() => setMActive(tab.id)}
+            className={`whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold transition-all border ${mActive === tab.id ? 'bg-[#4A7DE8] text-white border-[#4A7DE8] shadow-md' : 'bg-white text-gray-500 border-gray-100 hover:bg-gray-50'}`}>
+            <span className="mr-2">{tab.icon}</span>
+            {tab.label}
+          </button>
+        ))}
+      </div>
+      {renderTab()}
+    </div>
+  );
+}
+
 function AIAnalyzer() {
   const [input, setInput] = useState('');
   const [result, setResult] = useState(null);
@@ -792,11 +1392,7 @@ function MixedFlowSection() {
 
 // --- MAIN APP ---
 
-const NAV = [
-  { id: 'ia', label: 'IA Analyzer', icon: '📊' },
-  { id: 'flujo', label: 'Flujo completo', icon: '→' },
-  { id: 'corto', label: 'Flujo corto', icon: '⚡' },
-  { id: 'mixto', label: 'Flujo mixto', icon: '⇄' },
+  { id: 'marketing', label: 'Estrategias Marketing', icon: '🎯' },
   { id: 'tecnicas', label: 'Técnicas', icon: '◎' },
   { id: 'objeciones', label: 'Objeciones', icon: '💬' },
   { id: 'reactivacion', label: 'Reactivación', icon: '↺' },
@@ -810,6 +1406,7 @@ export default function App() {
 
   const SECTION_COMPONENTS = {
     ia: <AIAnalyzer />,
+    marketing: <MarketingSection />,
     flujo: <FlowSection />,
     corto: <ShortFlowSection />,
     mixto: <MixedFlowSection />,
