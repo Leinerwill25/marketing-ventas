@@ -3,7 +3,12 @@ import './globals.css';
 export const metadata = {
   title: 'ASHIRA Sales Intelligence',
   description: 'Playbook de ventas + IA para ASHIRA — la plataforma de gestión médica venezolana',
-  icons: { icon: '/favicon.ico' },
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/icon.png',
+    apple: '/apple-icon.png',
+    shortcut: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({ children }) {
